@@ -38,7 +38,6 @@ env/
 Thumbs.db
 
 # Project specific
-.cartography/
 *.log
 
 # uv
