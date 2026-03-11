@@ -27,6 +27,11 @@ Examples:
         required=True,
         help="Path to repository to analyze"
     )
+    analyze_parser.add_argument(
+        "--incremental",
+        action="store_true",
+        help="Only analyze files changed since last analysis"
+    )
     
     args = parser.parse_args()
     
@@ -42,7 +47,7 @@ Examples:
             return 1
         
         try:
-            run_cartographer(str(repo_path))
+            run_cartographer(str(repo_path), incremental=args.incremental)
             return 0
         except Exception as e:
             print(f"\nError during analysis: {e}")

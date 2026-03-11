@@ -2,21 +2,37 @@ from pathlib import Path
 from src.graph.knowledge_graph import KnowledgeGraph
 from src.agents.surveyor import Surveyor
 from src.agents.hydrologist import Hydrologist
+from src.utils.incremental import IncrementalTracker
 
 
-def run_cartographer(repo_path: str):
+def run_cartographer(repo_path: str, incremental: bool = False):
     """
     Run the Brownfield Cartographer analysis pipeline.
     
     Args:
         repo_path: Path to repository root
+        incremental: If True, only analyze changed files since last run
     """
     repo = Path(repo_path)
     
     print("="*60)
     print("Brownfield Cartographer - Codebase Intelligence System")
     print("="*60)
-    print(f"Repository: {repo}\n")
+    print(f"Repository: {repo}")
+    print(f"Mode: {'Incremental' if incremental else 'Full'} Analysis\n")
+    
+    # Initialize incremental tracker
+    tracker = None
+    changed_files = None
+    if incremental:
+        tracker = IncrementalTracker(str(repo))
+        changed_files = tracker.get_changed_files()
+        
+        if not changed_files:
+            print("No changes detected since last analysis. Skipping.")
+            return
+        
+        print(f"Analyzing {len(changed_files)} changed files...\n")
     
     # Initialize Knowledge Graph
     kg = KnowledgeGraph()
@@ -24,12 +40,18 @@ def run_cartographer(repo_path: str):
     # Run Surveyor Agent (Static Analysis)
     print("\n" + "="*60)
     surveyor = Surveyor(kg)
-    surveyor.run(str(repo))
+    if incremental and changed_files:
+        surveyor.run(str(repo), changed_files=changed_files)
+    else:
+        surveyor.run(str(repo))
     
     # Run Hydrologist Agent (Data Lineage)
     print("\n" + "="*60)
     hydrologist = Hydrologist(kg)
-    hydrologist.run(str(repo))
+    if incremental and changed_files:
+        hydrologist.run(str(repo), changed_files=changed_files)
+    else:
+        hydrologist.run(str(repo))
     
     # Save results
     print("\n" + "="*60)
@@ -70,6 +92,10 @@ def run_cartographer(repo_path: str):
     print("\n  Edges by type:")
     for edge_type, count in sorted(edge_types.items()):
         print(f"    {edge_type}: {count}")
+    
+    # Save incremental state if enabled
+    if incremental and tracker:
+        tracker.save_state()
     
     print("\n" + "="*60)
     print("✓ Cartography complete!")

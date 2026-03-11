@@ -11,22 +11,29 @@ class Hydrologist:
     def __init__(self, knowledge_graph: KnowledgeGraph):
         self.kg = knowledge_graph
     
-    def run(self, repo_path: str):
+    def run(self, repo_path: str, changed_files: set = None):
         """
         Analyze SQL files and build data lineage graph.
         
         Args:
             repo_path: Path to repository root
+            changed_files: Optional set of changed file paths for incremental mode
         """
         repo = Path(repo_path)
         print(f"Hydrologist: Analyzing SQL files at {repo}")
         
         # Find all SQL files
         sql_files = list(repo.rglob("*.sql"))
-        print(f"Hydrologist: Found {len(sql_files)} SQL files")
         
         # Find YAML config files (dbt, Airflow)
         yaml_files = list(repo.rglob("*.yml")) + list(repo.rglob("*.yaml"))
+        
+        # Filter to only changed files if in incremental mode
+        if changed_files is not None:
+            sql_files = [f for f in sql_files if str(f.relative_to(repo)) in changed_files]
+            yaml_files = [f for f in yaml_files if str(f.relative_to(repo)) in changed_files]
+        
+        print(f"Hydrologist: Found {len(sql_files)} SQL files")
         print(f"Hydrologist: Found {len(yaml_files)} YAML config files")
         
         # Analyze YAML configs first (for metadata)

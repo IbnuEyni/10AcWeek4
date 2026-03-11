@@ -12,18 +12,24 @@ class Surveyor:
         self.kg = knowledge_graph
         self.analyzer = LanguageRouter()
     
-    def run(self, repo_path: str):
+    def run(self, repo_path: str, changed_files: set = None):
         """
         Analyze repository structure and populate knowledge graph.
         
         Args:
             repo_path: Path to repository root
+            changed_files: Optional set of changed file paths for incremental mode
         """
         repo = Path(repo_path)
         print(f"Surveyor: Analyzing repository at {repo}")
         
         # Find all Python files
         py_files = list(repo.rglob("*.py"))
+        
+        # Filter to only changed files if in incremental mode
+        if changed_files is not None:
+            py_files = [f for f in py_files if str(f.relative_to(repo)) in changed_files]
+        
         print(f"Surveyor: Found {len(py_files)} Python files")
         
         # Analyze each Python file
