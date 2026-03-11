@@ -68,7 +68,7 @@ pip install -e .
 ### Basic Analysis
 
 ```bash
-# Analyze a repository
+# Analyze a repository (full analysis)
 .venv/bin/python -m src.cli analyze --repo /path/to/repository
 
 # Analyze current directory
@@ -76,6 +76,9 @@ pip install -e .
 
 # Analyze dbt project
 .venv/bin/python -m src.cli analyze --repo jaffle-shop
+
+# Incremental analysis (only changed files since last run)
+.venv/bin/python -m src.cli analyze --repo . --incremental
 ```
 
 ### Output Artifacts
