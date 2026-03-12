@@ -22,20 +22,20 @@ class ContextWindowBudget:
     # Model configurations with pricing (per 1M tokens)
     MODELS = {
         "cheap": {
-            "name": "openrouter/google/gemini-2.0-flash-exp:free",
-            "input_cost": 0.0,  # Free tier
+            "name": "openrouter/qwen/qwen-2.5-7b-instruct",
+            "input_cost": 0.0,
             "output_cost": 0.0,
-            "fallback": "gpt-3.5-turbo",
-            "fallback_input_cost": 0.50,
-            "fallback_output_cost": 1.50,
+            "fallback": "openrouter/mistralai/mistral-7b-instruct",
+            "fallback_input_cost": 0.06,
+            "fallback_output_cost": 0.06,
         },
         "expensive": {
-            "name": "openrouter/anthropic/claude-3.5-sonnet",
-            "input_cost": 3.00,
-            "output_cost": 15.00,
-            "fallback": "gpt-4o",
-            "fallback_input_cost": 2.50,
-            "fallback_output_cost": 10.00,
+            "name": "openrouter/qwen/qwen-2.5-7b-instruct",
+            "input_cost": 0.0,
+            "output_cost": 0.0,
+            "fallback": "openrouter/mistralai/mistral-7b-instruct",
+            "fallback_input_cost": 0.06,
+            "fallback_output_cost": 0.06,
         }
     }
     

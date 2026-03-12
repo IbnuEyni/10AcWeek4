@@ -569,7 +569,7 @@ Respond with ONLY the domain name (1-2 words, no explanation).
             response = self.budget.call_llm(
                 prompt=prompt,
                 tier="expensive",
-                max_tokens=2000,
+                max_tokens=1200,  # Reduced to fit credit limits
                 temperature=0.4
             )
             

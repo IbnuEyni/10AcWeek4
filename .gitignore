@@ -45,3 +45,6 @@ uv.lock
 
 # Brownfield cartographer subdirectory
 brownfield-cartographer/
+.env
+jaffle-shop/
+ol-data-platform/

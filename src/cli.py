@@ -1,6 +1,10 @@
 import argparse
 from pathlib import Path
+from dotenv import load_dotenv
 from src.orchestrator import run_cartographer
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def main():
