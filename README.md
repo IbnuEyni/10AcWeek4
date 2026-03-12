@@ -27,6 +27,12 @@ The Brownfield Cartographer solves the "Day-One Problem" for Forward Deployed En
 - Blast radius calculation for impact analysis
 - Upstream/downstream dependency tracing
 
+### Semantic Analysis (Semanticist Agent)
+- LLM-powered purpose statement generation
+- Documentation drift detection
+- Business context extraction from code
+- Automatic docstring validation
+
 ### Knowledge Graph
 - NetworkX-based directed graph
 - Strongly-typed Pydantic schemas for all nodes and edges
@@ -79,6 +85,12 @@ pip install -e .
 
 # Incremental analysis (only changed files since last run)
 .venv/bin/python -m src.cli analyze --repo . --incremental
+
+# With LLM-powered semantic analysis (requires OPENROUTER_API_KEY)
+.venv/bin/python -m src.cli analyze --repo . --llm
+
+# Combined: incremental + LLM
+.venv/bin/python -m src.cli analyze --repo . --incremental --llm
 ```
 
 ### Output Artifacts

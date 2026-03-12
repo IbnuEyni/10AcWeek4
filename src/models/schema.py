@@ -10,6 +10,7 @@ class ModuleNode(BaseModel):
     complexity_score: float
     change_velocity_30d: int
     is_dead_code_candidate: bool
+    has_documentation_drift: bool = False
 
 
 class DatasetNode(BaseModel):

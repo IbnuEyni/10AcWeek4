@@ -2,17 +2,19 @@ from pathlib import Path
 from src.graph.knowledge_graph import KnowledgeGraph
 from src.agents.surveyor import Surveyor
 from src.agents.hydrologist import Hydrologist
+from src.agents.semanticist import Semanticist
 from src.utils.incremental import IncrementalTracker
 
 
-def run_cartographer(repo_path: str, incremental: bool = False):
+def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool = False):
     """
     Run the Brownfield Cartographer analysis pipeline.
     
     Args:
         repo_path: Path to repository root
         incremental: If True, only analyze changed files since last run
-    """
+        enable_llm: If True, run Semanticist agent for LLM-powered analysis
+    """""
     repo = Path(repo_path)
     
     print("="*60)
@@ -52,6 +54,13 @@ def run_cartographer(repo_path: str, incremental: bool = False):
         hydrologist.run(str(repo), changed_files=changed_files)
     else:
         hydrologist.run(str(repo))
+    
+    # Run Semanticist Agent (LLM-Powered Semantic Analysis) - Optional
+    if enable_llm:
+        print("\n" + "="*60)
+        semanticist = Semanticist(kg)
+        semanticist.generate_purpose_statements(str(repo))
+        semanticist.print_drift_report()
     
     # Save results
     print("\n" + "="*60)

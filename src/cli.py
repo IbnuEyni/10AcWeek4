@@ -32,6 +32,11 @@ Examples:
         action="store_true",
         help="Only analyze files changed since last analysis"
     )
+    analyze_parser.add_argument(
+        "--llm",
+        action="store_true",
+        help="Enable LLM-powered semantic analysis (requires OPENROUTER_API_KEY)"
+    )
     
     args = parser.parse_args()
     
@@ -47,7 +52,7 @@ Examples:
             return 1
         
         try:
-            run_cartographer(str(repo_path), incremental=args.incremental)
+            run_cartographer(str(repo_path), incremental=args.incremental, enable_llm=args.llm)
             return 0
         except Exception as e:
             print(f"\nError during analysis: {e}")
