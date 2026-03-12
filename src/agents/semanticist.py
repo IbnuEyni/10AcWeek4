@@ -536,6 +536,240 @@ Respond with ONLY the domain name (1-2 words, no explanation).
                 distribution[domain] = distribution.get(domain, 0) + 1
         
         return distribution
+    
+    def answer_day_one_questions(self) -> str:
+        """
+        Answer the Five FDE Day-One Questions using architectural context.
+        
+        Gathers:
+        - Top 5 modules by PageRank (architectural hubs)
+        - Entry/exit datasets (data sources and sinks)
+        - Domain clusters (business domains)
+        
+        Uses expensive LLM tier to generate comprehensive answers with
+        specific file paths and line numbers.
+        
+        Returns:
+            Markdown string with answers to the five questions
+        """
+        print("\n" + "="*60)
+        print("Semanticist: Answering FDE Day-One Questions")
+        print("="*60)
+        
+        # Gather architectural context
+        context = self._gather_architectural_context()
+        
+        # Build prompt
+        prompt = self._build_day_one_prompt(context)
+        
+        print("\nCalling expensive LLM tier for comprehensive analysis...")
+        
+        try:
+            # Call expensive LLM for high-quality analysis
+            response = self.budget.call_llm(
+                prompt=prompt,
+                tier="expensive",
+                max_tokens=2000,
+                temperature=0.4
+            )
+            
+            print("✓ Analysis complete\n")
+            return response
+        
+        except Exception as e:
+            error_msg = f"Error generating Day-One answers: {e}"
+            print(f"✗ {error_msg}\n")
+            return f"# FDE Day-One Questions\n\n**Error:** {error_msg}"
+    
+    def _gather_architectural_context(self) -> Dict[str, Any]:
+        """
+        Gather architectural context from the knowledge graph.
+        
+        Returns:
+            Dict with top_modules, entry_datasets, exit_datasets, domains
+        """
+        context = {
+            "top_modules": [],
+            "entry_datasets": [],
+            "exit_datasets": [],
+            "domains": {},
+            "total_modules": 0,
+            "total_datasets": 0
+        }
+        
+        # Get top 5 modules by PageRank
+        modules_with_pagerank = []
+        for node_id, data in self.kg.graph.nodes(data=True):
+            if data.get("node_type") == "module":
+                context["total_modules"] += 1
+                pagerank = data.get("pagerank", 0.0)
+                if pagerank > 0:
+                    modules_with_pagerank.append({
+                        "path": data.get("path"),
+                        "pagerank": pagerank,
+                        "purpose": data.get("purpose_statement", "No purpose statement"),
+                        "domain": data.get("domain_cluster", "Unclustered")
+                    })
+        
+        # Sort by PageRank and take top 5
+        modules_with_pagerank.sort(key=lambda x: x["pagerank"], reverse=True)
+        context["top_modules"] = modules_with_pagerank[:5]
+        
+        # Get entry datasets (no incoming PRODUCES edges)
+        # Get exit datasets (no outgoing CONSUMES edges)
+        for node_id, data in self.kg.graph.nodes(data=True):
+            if data.get("node_type") == "dataset":
+                context["total_datasets"] += 1
+                
+                # Check for incoming PRODUCES edges
+                has_producers = any(
+                    edge_data.get("edge_type") == "PRODUCES"
+                    for _, _, edge_data in self.kg.graph.in_edges(node_id, data=True)
+                )
+                
+                # Check for outgoing CONSUMES edges
+                has_consumers = any(
+                    edge_data.get("edge_type") == "CONSUMES"
+                    for _, _, edge_data in self.kg.graph.out_edges(node_id, data=True)
+                )
+                
+                dataset_info = {
+                    "name": data.get("name", node_id),
+                    "path": data.get("path", "N/A"),
+                    "schema": data.get("schema", "Unknown")
+                }
+                
+                if not has_producers:
+                    context["entry_datasets"].append(dataset_info)
+                
+                if not has_consumers:
+                    context["exit_datasets"].append(dataset_info)
+        
+        # Get domain distribution
+        context["domains"] = self.get_domain_distribution()
+        
+        return context
+    
+    def _build_day_one_prompt(self, context: Dict[str, Any]) -> str:
+        """
+        Build the prompt for answering Day-One questions.
+        
+        Args:
+            context: Architectural context from knowledge graph
+        
+        Returns:
+            Formatted prompt string
+        """
+        # Format top modules
+        top_modules_text = "\n".join([
+            f"{i+1}. {m['path']} (PageRank: {m['pagerank']:.4f}, Domain: {m['domain']})\n   Purpose: {m['purpose']}"
+            for i, m in enumerate(context["top_modules"])
+        ])
+        
+        # Format entry datasets
+        entry_datasets_text = "\n".join([
+            f"- {d['name']} (Schema: {d['schema']}, Path: {d['path']})"
+            for d in context["entry_datasets"][:10]  # Limit to 10
+        ]) or "None identified"
+        
+        # Format exit datasets
+        exit_datasets_text = "\n".join([
+            f"- {d['name']} (Schema: {d['schema']}, Path: {d['path']})"
+            for d in context["exit_datasets"][:10]  # Limit to 10
+        ]) or "None identified"
+        
+        # Format domains
+        domains_text = "\n".join([
+            f"- {domain}: {count} modules"
+            for domain, count in sorted(context["domains"].items(), key=lambda x: x[1], reverse=True)
+        ]) or "No domains identified"
+        
+        prompt = f"""You are a Forward Deployed Engineer analyzing a new codebase on Day One.
+
+Answer the Five FDE Day-One Questions clearly and concisely, citing specific file paths from the architectural context below.
+
+## THE FIVE FDE DAY-ONE QUESTIONS:
+
+1. **What does this system do?** (Business purpose in 2-3 sentences)
+2. **Where does the data come from?** (Entry points and data sources)
+3. **Where does the data go?** (Exit points and data sinks)
+4. **What are the critical paths?** (Most important modules/flows)
+5. **What are the biggest risks?** (Technical debt, bottlenecks, failure points)
+
+## ARCHITECTURAL CONTEXT:
+
+### Repository Statistics:
+- Total Modules: {context['total_modules']}
+- Total Datasets: {context['total_datasets']}
+
+### Top 5 Architectural Hubs (by PageRank):
+{top_modules_text}
+
+### Entry Datasets (Data Sources):
+{entry_datasets_text}
+
+### Exit Datasets (Data Sinks):
+{exit_datasets_text}
+
+### Business Domains:
+{domains_text}
+
+## INSTRUCTIONS:
+
+- Answer each question with 2-4 sentences
+- Cite specific file paths (e.g., "src/cli.py", "models/customers.sql")
+- Be concrete and actionable
+- Focus on what an FDE needs to know on Day One
+- Use markdown formatting
+
+Respond in this format:
+
+# FDE Day-One Analysis
+
+## 1. What does this system do?
+[Your answer with file citations]
+
+## 2. Where does the data come from?
+[Your answer with file citations]
+
+## 3. Where does the data go?
+[Your answer with file citations]
+
+## 4. What are the critical paths?
+[Your answer with file citations]
+
+## 5. What are the biggest risks?
+[Your answer with file citations]
+"""
+        
+        return prompt
+
+
+# Example usage
+if __name__ == "__main__":
+    from src.graph.knowledge_graph import KnowledgeGraph
+    from src.agents.surveyor import Surveyor
+    
+    # Initialize graph and run surveyor first
+    kg = KnowledgeGraph()
+    surveyor = Surveyor(kg)
+    surveyor.run(".")
+    
+    # Run semanticist
+    semanticist = Semanticist(kg)
+    semanticist.generate_purpose_statements(".")
+    
+    # Cluster into domains
+    semanticist.cluster_into_domains(k=5)
+    
+    # Print drift report
+    semanticist.print_drift_report()
+    
+    # Print domain distribution
+    distribution = semanticist.get_domain_distribution()
+    print("\nDomain Distribution:")
+    for domain, count in sorted(distribution.items(), key=lambda x: x[1], reverse=True):
+        print(f"  {domain}: {count} modules")
 
 
 # Example usage

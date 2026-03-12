@@ -34,6 +34,7 @@ The Brownfield Cartographer solves the "Day-One Problem" for Forward Deployed En
 - Automatic docstring validation
 - Domain clustering using embeddings and k-means
 - Automatic business domain naming
+- **FDE Day-One Questions**: Answers the Five Day-One Questions using architectural context
 
 ### Knowledge Graph
 - NetworkX-based directed graph
@@ -103,6 +104,7 @@ Analysis generates the following in `.cartography/`:
 .cartography/
 ├── module_graph.json       # Complete knowledge graph
 ├── lineage_graph.json      # Data lineage (same as module_graph)
+├── day_one_questions.md    # FDE Day-One analysis (with --llm flag)
 └── last_analysis.json      # State for incremental updates
 ```
 
@@ -191,6 +193,45 @@ Analysis generates the following in `.cartography/`:
 - `dag_config_parser.py` - YAML config parsing
 
 ## Examples
+
+### Answering FDE Day-One Questions
+
+When using the `--llm` flag, the Semanticist automatically generates answers to the Five FDE Day-One Questions:
+
+```bash
+.venv/bin/python -m src.cli analyze --repo . --llm
+```
+
+**Output** (`.cartography/day_one_questions.md`):
+```markdown
+# FDE Day-One Analysis
+
+## 1. What does this system do?
+The Brownfield Cartographer is a codebase intelligence system that analyzes
+undocumented repositories and generates knowledge graphs. The system orchestrates
+three agents (Surveyor, Hydrologist, Semanticist) via src/orchestrator.py to
+extract structural, data lineage, and semantic insights.
+
+## 2. Where does the data come from?
+Data originates from source code files (.py, .sql, .yml) in the target repository.
+The Surveyor agent (src/agents/surveyor.py) parses Python modules using tree-sitter,
+while the Hydrologist (src/agents/hydrologist.py) extracts SQL dependencies.
+
+## 3. Where does the data go?
+Analysis results are serialized to .cartography/module_graph.json and
+.cartography/lineage_graph.json. The knowledge graph can be consumed by
+downstream visualization tools or queried programmatically.
+
+## 4. What are the critical paths?
+The orchestrator (src/orchestrator.py, PageRank: 0.0312) coordinates the pipeline.
+The knowledge graph (src/graph/knowledge_graph.py, PageRank: 0.0389) is the
+central data structure. The CLI (src/cli.py, PageRank: 0.0287) is the entry point.
+
+## 5. What are the biggest risks?
+- LLM API failures could break semantic analysis (no fallback for embeddings)
+- Large repositories (>10k files) may exceed token budgets
+- Circular dependencies detected in 3 modules could cause import issues
+```
 
 ### Analyzing dbt Projects
 

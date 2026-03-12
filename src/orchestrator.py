@@ -64,6 +64,14 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
         # Cluster into domains
         semanticist.cluster_into_domains(k=5)
         
+        # Answer Day-One Questions
+        day_one_answers = semanticist.answer_day_one_questions()
+        
+        # Save Day-One answers
+        day_one_path = repo / ".cartography" / "day_one_questions.md"
+        day_one_path.write_text(day_one_answers, encoding='utf-8')
+        print(f"✓ Day-One answers saved to: {day_one_path}")
+        
         # Print reports
         semanticist.print_drift_report()
     
