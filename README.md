@@ -32,6 +32,8 @@ The Brownfield Cartographer solves the "Day-One Problem" for Forward Deployed En
 - Documentation drift detection
 - Business context extraction from code
 - Automatic docstring validation
+- Domain clustering using embeddings and k-means
+- Automatic business domain naming
 
 ### Knowledge Graph
 - NetworkX-based directed graph

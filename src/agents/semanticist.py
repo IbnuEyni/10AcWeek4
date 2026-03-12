@@ -7,7 +7,10 @@ Generates purpose statements and detects documentation drift using LLMs.
 import json
 import re
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Tuple
+import numpy as np
+from sklearn.cluster import KMeans
+from litellm import embedding
 from src.graph.knowledge_graph import KnowledgeGraph
 from src.utils.llm_budget import ContextWindowBudget
 
@@ -328,6 +331,211 @@ Focus on:
             "budget": self.budget.get_summary(),
             "drift_modules": len(self.get_modules_with_drift())
         }
+    
+    def cluster_into_domains(self, k: int = 5):
+        """
+        Cluster modules into business domains using embeddings and LLM.
+        
+        Uses vector embeddings of purpose statements to group similar modules,
+        then asks an LLM to name each domain cluster.
+        
+        Args:
+            k: Number of clusters (default: 5)
+        """
+        print("\n" + "="*60)
+        print(f"Semanticist: Clustering Modules into {k} Domains")
+        print("="*60)
+        
+        # Step 1: Extract all purpose statements from ModuleNodes
+        modules_with_purpose = []
+        for node_id, data in self.kg.graph.nodes(data=True):
+            if data.get("node_type") == "module" and data.get("purpose_statement"):
+                modules_with_purpose.append({
+                    "node_id": node_id,
+                    "path": data.get("path"),
+                    "purpose": data.get("purpose_statement")
+                })
+        
+        if len(modules_with_purpose) < k:
+            print(f"\n⚠ Only {len(modules_with_purpose)} modules with purpose statements")
+            print(f"  Need at least {k} modules for {k} clusters")
+            print("  Skipping clustering.")
+            return
+        
+        print(f"\nFound {len(modules_with_purpose)} modules with purpose statements")
+        
+        # Step 2: Get embeddings for each purpose statement
+        print("\nGenerating embeddings...")
+        embeddings_list = []
+        
+        for i, module in enumerate(modules_with_purpose, 1):
+            try:
+                # Get embedding using litellm
+                response = embedding(
+                    model="text-embedding-3-small",  # OpenAI's cheap embedding model
+                    input=[module["purpose"]]
+                )
+                
+                # Extract embedding vector
+                embedding_vector = response.data[0]["embedding"]
+                embeddings_list.append(embedding_vector)
+                
+                if i % 10 == 0:
+                    print(f"  Progress: {i}/{len(modules_with_purpose)} embeddings generated")
+            
+            except Exception as e:
+                print(f"  ✗ Error getting embedding for {module['path']}: {e}")
+                # Use zero vector as fallback
+                embeddings_list.append([0.0] * 1536)  # text-embedding-3-small dimension
+        
+        print(f"✓ Generated {len(embeddings_list)} embeddings")
+        
+        # Step 3: Cluster embeddings using KMeans
+        print(f"\nClustering into {k} groups...")
+        embeddings_array = np.array(embeddings_list)
+        
+        kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+        cluster_labels = kmeans.fit_predict(embeddings_array)
+        
+        # Step 4: Group purpose statements by cluster
+        clusters = {i: [] for i in range(k)}
+        for module, label in zip(modules_with_purpose, cluster_labels):
+            module["cluster"] = int(label)
+            clusters[label].append(module)
+        
+        print("✓ Clustering complete")
+        print("\nCluster sizes:")
+        for cluster_id, modules in clusters.items():
+            print(f"  Cluster {cluster_id}: {len(modules)} modules")
+        
+        # Step 5: Generate domain names for each cluster
+        print("\nGenerating domain names...")
+        domain_names = {}
+        
+        for cluster_id, modules in clusters.items():
+            print(f"\n  Cluster {cluster_id}:")
+            
+            # Build prompt with purpose statements
+            purposes = [m["purpose"] for m in modules[:10]]  # Limit to 10 for token budget
+            domain_name = self._generate_domain_name(cluster_id, purposes)
+            
+            if domain_name:
+                domain_names[cluster_id] = domain_name
+                print(f"    ✓ Domain: '{domain_name}'")
+            else:
+                domain_names[cluster_id] = f"Domain_{cluster_id}"
+                print(f"    ⚠ Using fallback: 'Domain_{cluster_id}'")
+        
+        # Step 6: Update ModuleNode.domain_cluster in graph
+        print("\nUpdating module domain clusters...")
+        updated_count = 0
+        
+        for module in modules_with_purpose:
+            cluster_id = module["cluster"]
+            domain_name = domain_names.get(cluster_id, f"Domain_{cluster_id}")
+            
+            # Update node in graph
+            node_id = module["node_id"]
+            if self.kg.graph.has_node(node_id):
+                self.kg.graph.nodes[node_id]["domain_cluster"] = domain_name
+                updated_count += 1
+        
+        print(f"✓ Updated {updated_count} modules with domain clusters")
+        
+        # Print summary
+        self._print_domain_summary(domain_names, clusters)
+    
+    def _generate_domain_name(self, cluster_id: int, purposes: List[str]) -> Optional[str]:
+        """
+        Generate a domain name for a cluster using LLM.
+        
+        Args:
+            cluster_id: Cluster identifier
+            purposes: List of purpose statements in this cluster
+        
+        Returns:
+            1-2 word domain name, or None on failure
+        """
+        # Build prompt
+        purposes_text = "\n".join([f"- {p[:150]}..." for p in purposes])
+        
+        prompt = f"""Analyze these module purposes and generate a 1-2 word Business Domain Name.
+
+The domain name should capture the common theme or business function.
+
+Examples of good domain names:
+- "Data Ingestion"
+- "API Serving"
+- "Authentication"
+- "Analytics"
+- "Storage"
+- "Orchestration"
+
+Module purposes in this cluster:
+{purposes_text}
+
+Respond with ONLY the domain name (1-2 words, no explanation).
+"""
+        
+        try:
+            response = self.budget.call_llm(
+                prompt=prompt,
+                tier="cheap",
+                max_tokens=20,
+                temperature=0.3
+            )
+            
+            # Clean up response
+            domain_name = response.strip().strip('"').strip("'")
+            
+            # Validate it's short (1-3 words)
+            words = domain_name.split()
+            if len(words) <= 3:
+                return domain_name
+            else:
+                # Take first 2 words if too long
+                return " ".join(words[:2])
+        
+        except Exception as e:
+            print(f"      LLM call failed: {e}")
+            return None
+    
+    def _print_domain_summary(self, domain_names: Dict[int, str], clusters: Dict[int, List[Dict]]):
+        """Print a summary of domain clustering results."""
+        print("\n" + "="*60)
+        print("Domain Clustering Summary")
+        print("="*60)
+        
+        for cluster_id in sorted(domain_names.keys()):
+            domain_name = domain_names[cluster_id]
+            modules = clusters[cluster_id]
+            
+            print(f"\n{cluster_id + 1}. {domain_name} ({len(modules)} modules)")
+            
+            # Show first 3 modules as examples
+            for module in modules[:3]:
+                print(f"   - {module['path']}")
+            
+            if len(modules) > 3:
+                print(f"   ... and {len(modules) - 3} more")
+        
+        print("\n" + "="*60)
+    
+    def get_domain_distribution(self) -> Dict[str, int]:
+        """
+        Get the distribution of modules across domains.
+        
+        Returns:
+            Dict mapping domain names to module counts
+        """
+        distribution = {}
+        
+        for node_id, data in self.kg.graph.nodes(data=True):
+            if data.get("node_type") == "module":
+                domain = data.get("domain_cluster", "Unclustered")
+                distribution[domain] = distribution.get(domain, 0) + 1
+        
+        return distribution
 
 
 # Example usage
@@ -344,5 +552,14 @@ if __name__ == "__main__":
     semanticist = Semanticist(kg)
     semanticist.generate_purpose_statements(".")
     
+    # Cluster into domains
+    semanticist.cluster_into_domains(k=5)
+    
     # Print drift report
     semanticist.print_drift_report()
+    
+    # Print domain distribution
+    distribution = semanticist.get_domain_distribution()
+    print("\nDomain Distribution:")
+    for domain, count in sorted(distribution.items(), key=lambda x: x[1], reverse=True):
+        print(f"  {domain}: {count} modules")

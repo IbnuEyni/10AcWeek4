@@ -163,6 +163,41 @@ def test_small_repo():
             print(f"  {data.get('purpose_statement')}")
 
 
+def test_domain_clustering():
+    """Test domain clustering functionality."""
+    print("\n" + "="*60)
+    print("TEST: Domain Clustering")
+    print("="*60)
+    
+    if not os.getenv("OPENROUTER_API_KEY"):
+        print("\n⚠ OPENROUTER_API_KEY not set - skipping")
+        return
+    
+    # Initialize graph
+    kg = KnowledgeGraph()
+    
+    # Run surveyor first
+    print("\n1. Running Surveyor...")
+    from src.agents.surveyor import Surveyor
+    surveyor = Surveyor(kg)
+    surveyor.run(".")
+    
+    # Run semanticist to generate purpose statements
+    print("\n2. Generating purpose statements...")
+    semanticist = Semanticist(kg)
+    semanticist.generate_purpose_statements(".")
+    
+    # Cluster into domains
+    print("\n3. Clustering into domains...")
+    semanticist.cluster_into_domains(k=3)  # Use k=3 for small test
+    
+    # Show domain distribution
+    print("\n4. Domain Distribution:")
+    distribution = semanticist.get_domain_distribution()
+    for domain, count in sorted(distribution.items(), key=lambda x: x[1], reverse=True):
+        print(f"   {domain}: {count} modules")
+
+
 def main():
     """Run all tests."""
     print("\n" + "="*60)
@@ -179,6 +214,7 @@ def main():
     if os.getenv("OPENROUTER_API_KEY"):
         print("\n✓ OPENROUTER_API_KEY found - running LLM tests")
         test_small_repo()
+        # test_domain_clustering()  # Uncomment for full clustering test
         # test_semanticist_basic()  # Uncomment for full test
     else:
         print("\n⚠ OPENROUTER_API_KEY not set - skipping LLM tests")

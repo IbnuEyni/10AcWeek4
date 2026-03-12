@@ -60,6 +60,11 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
         print("\n" + "="*60)
         semanticist = Semanticist(kg)
         semanticist.generate_purpose_statements(str(repo))
+        
+        # Cluster into domains
+        semanticist.cluster_into_domains(k=5)
+        
+        # Print reports
         semanticist.print_drift_report()
     
     # Save results
