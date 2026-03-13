@@ -44,3 +44,9 @@ class KnowledgeGraph:
         data = nx.node_link_data(self.graph)
         with open(output_path, 'w') as f:
             json.dump(data, f, indent=2)
+    
+    def load_from_json(self, input_path: str):
+        """Load knowledge graph from JSON file."""
+        with open(input_path, 'r') as f:
+            data = json.load(f)
+        self.graph = nx.node_link_graph(data, directed=True)
