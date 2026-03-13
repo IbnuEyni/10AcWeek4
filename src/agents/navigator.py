@@ -1,0 +1,365 @@
+"""
+Navigator Agent - LangChain Tools for Knowledge Graph Querying.
+
+Provides tools for semantic search, lineage tracing, blast radius analysis,
+and module explanation using the knowledge graph and semantic index.
+"""
+
+from pathlib import Path
+from typing import List, Dict, Any, Optional
+import chromadb
+from chromadb.utils import embedding_functions
+from langchain_core.tools import tool
+from src.graph.knowledge_graph import KnowledgeGraph
+
+
+class Navigator:
+    """
+    Navigator agent with LangChain tools for querying the knowledge graph.
+    
+    Provides tools for:
+    - Semantic search over module purposes
+    - Data lineage tracing (upstream/downstream)
+    - Blast radius analysis (dependency impact)
+    - Module explanation (code + purpose)
+    """
+    
+    def __init__(
+        self,
+        knowledge_graph: KnowledgeGraph,
+        semantic_index_path: Optional[str] = None
+    ):
+        """
+        Initialize the Navigator agent.
+        
+        Args:
+            knowledge_graph: The knowledge graph to query
+            semantic_index_path: Path to ChromaDB semantic index (optional)
+        """
+        self.kg = knowledge_graph
+        self.semantic_index_path = semantic_index_path
+        self._chroma_client = None
+        self._chroma_collection = None
+    
+    def _get_semantic_index(self):
+        """Lazy load ChromaDB semantic index."""
+        if self._chroma_collection is None and self.semantic_index_path:
+            try:
+                self._chroma_client = chromadb.PersistentClient(
+                    path=self.semantic_index_path
+                )
+                self._chroma_collection = self._chroma_client.get_collection(
+                    name="module_purposes"
+                )
+            except Exception as e:
+                print(f"Warning: Could not load semantic index: {e}")
+        
+        return self._chroma_collection
+    
+    def find_implementation(self, concept: str) -> str:
+        """Find modules that implement a specific concept using semantic search."""
+        collection = self._get_semantic_index()
+        
+        if collection is None:
+            return """**Error**: Semantic index not available.
+            
+**Analysis Method**: Semantic Search (ChromaDB)
+**Status**: Index not found or not built yet
+**Suggestion**: Run analysis with --llm flag to build semantic index
+"""
+        
+        try:
+            results = collection.query(query_texts=[concept], n_results=5)
+            
+            if not results['documents'][0]:
+                return f"""**No Results Found**
+
+**Query**: {concept}
+**Analysis Method**: Semantic Search (ChromaDB with all-MiniLM-L6-v2)
+**Results**: No modules found matching this concept
+"""
+            
+            output = [f"**Search Results for**: {concept}\n"]
+            output.append("**Analysis Method**: Semantic Search (ChromaDB with all-MiniLM-L6-v2)\n")
+            output.append(f"**Results**: {len(results['documents'][0])} modules found\n")
+            
+            for i, (doc, metadata, distance) in enumerate(
+                zip(results['documents'][0], results['metadatas'][0], results['distances'][0]), 1
+            ):
+                relevance = 1.0 - distance
+                output.append(f"\n### {i}. {metadata['filepath']}")
+                output.append(f"- **Relevance**: {relevance:.2%}")
+                output.append(f"- **Domain**: {metadata.get('domain', 'Unknown')}")
+                output.append(f"- **PageRank**: {metadata.get('pagerank', 0.0):.4f}")
+                output.append(f"- **Purpose**: {doc[:200]}{'...' if len(doc) > 200 else ''}")
+                output.append(f"- **Citation**: `{metadata['filepath']}` (lines 1-N)")
+            
+            return "\n".join(output)
+        
+        except Exception as e:
+            return f"**Error**: {str(e)}\n\n**Analysis Method**: Semantic Search (ChromaDB)"
+    
+    def trace_lineage(self, dataset: str, direction: str) -> str:
+        """Trace data lineage to find upstream sources or downstream consumers."""
+        if direction not in ["upstream", "downstream"]:
+            return f"""**Error**: Invalid direction '{direction}'
+
+**Valid Options**: "upstream" or "downstream"
+**Analysis Method**: Data Lineage Tracing (Knowledge Graph)
+"""
+        
+        dataset_node = None
+        for node_id, data in self.kg.graph.nodes(data=True):
+            if data.get("node_type") == "dataset":
+                if data.get("name") == dataset or node_id == dataset:
+                    dataset_node = node_id
+                    break
+        
+        if dataset_node is None:
+            return f"""**Dataset Not Found**: {dataset}
+
+**Analysis Method**: Data Lineage Tracing (Knowledge Graph)
+**Status**: Dataset not found in knowledge graph
+"""
+        
+        connected = []
+        
+        if direction == "upstream":
+            for source, target, edge_data in self.kg.graph.in_edges(dataset_node, data=True):
+                if edge_data.get("edge_type") == "PRODUCES":
+                    source_data = self.kg.graph.nodes[source]
+                    connected.append({
+                        "node": source,
+                        "type": source_data.get("node_type", "unknown"),
+                        "edge": "PRODUCES",
+                        "path": source_data.get("path", "N/A")
+                    })
+        else:
+            for source, target, edge_data in self.kg.graph.out_edges(dataset_node, data=True):
+                if edge_data.get("edge_type") == "CONSUMES":
+                    target_data = self.kg.graph.nodes[target]
+                    connected.append({
+                        "node": target,
+                        "type": target_data.get("node_type", "unknown"),
+                        "edge": "CONSUMES",
+                        "path": target_data.get("path", "N/A")
+                    })
+        
+        output = [f"**Data Lineage for**: {dataset}"]
+        output.append(f"**Direction**: {direction.capitalize()}")
+        output.append(f"**Analysis Method**: Graph Traversal (PRODUCES/CONSUMES edges)")
+        output.append(f"**Results**: {len(connected)} connections found\n")
+        
+        if not connected:
+            output.append(f"**Status**: No {direction} connections found")
+        else:
+            for i, conn in enumerate(connected, 1):
+                output.append(f"\n### {i}. {conn['node']}")
+                output.append(f"- **Type**: {conn['type']}")
+                output.append(f"- **Connection**: {conn['edge']}")
+                output.append(f"- **Citation**: `{conn['path']}`")
+        
+        return "\n".join(output)
+    
+    def blast_radius(self, module_path: str) -> str:
+        """Calculate blast radius to find all modules that depend on a given module."""
+        module_node = None
+        for node_id, data in self.kg.graph.nodes(data=True):
+            if data.get("node_type") == "module":
+                if data.get("path") == module_path or node_id == module_path:
+                    module_node = node_id
+                    break
+        
+        if module_node is None:
+            return f"""**Module Not Found**: {module_path}
+
+**Analysis Method**: Blast Radius Analysis (Knowledge Graph)
+**Status**: Module not found in knowledge graph
+"""
+        
+        direct_dependents = []
+        for source, target, edge_data in self.kg.graph.in_edges(module_node, data=True):
+            if edge_data.get("edge_type") == "IMPORTS":
+                source_data = self.kg.graph.nodes[source]
+                if source_data.get("node_type") == "module":
+                    direct_dependents.append({
+                        "node": source,
+                        "path": source_data.get("path", source),
+                        "pagerank": source_data.get("pagerank", 0.0) or 0.0
+                    })
+        
+        output = [f"**Blast Radius for**: {module_path}"]
+        output.append(f"**Analysis Method**: Dependency Graph Traversal (IMPORTS edges)")
+        output.append(f"**Direct Dependents**: {len(direct_dependents)}")
+        output.append(f"**Total Impact**: {len(direct_dependents)} modules\n")
+        
+        if not direct_dependents:
+            output.append("**Status**: No modules depend on this module")
+        else:
+            output.append("## Direct Dependents\n")
+            direct_dependents.sort(key=lambda x: x["pagerank"], reverse=True)
+            
+            for i, dep in enumerate(direct_dependents, 1):
+                output.append(f"### {i}. {dep['path']}")
+                output.append(f"- **PageRank**: {dep['pagerank']:.4f}")
+                output.append(f"- **Citation**: `{dep['path']}` (import statement)")
+        
+        return "\n".join(output)
+    
+    def explain_module(self, path: str) -> str:
+        """Explain what a module does by retrieving its code and purpose statement."""
+        module_node = None
+        module_data = None
+        for node_id, data in self.kg.graph.nodes(data=True):
+            if data.get("node_type") == "module":
+                if data.get("path") == path or node_id == path:
+                    module_node = node_id
+                    module_data = data
+                    break
+        
+        if module_node is None:
+            return f"""**Module Not Found**: {path}
+
+**Analysis Method**: Knowledge Graph Lookup
+**Status**: Module not found in knowledge graph
+"""
+        
+        purpose = module_data.get("purpose_statement", "No purpose statement available")
+        domain = module_data.get("domain_cluster", "Unclustered")
+        pagerank = module_data.get("pagerank", 0.0) or 0.0
+        complexity = module_data.get("complexity_score", 0.0) or 0.0
+        velocity = module_data.get("change_velocity_30d", 0) or 0
+        
+        output = [f"**Module Explanation**: {path}\n"]
+        output.append(f"**Analysis Method**: Knowledge Graph Lookup + Static Analysis\n")
+        output.append("## Purpose\n")
+        output.append(purpose)
+        output.append("\n## Metadata\n")
+        output.append(f"- **Domain**: {domain}")
+        output.append(f"- **PageRank**: {pagerank:.4f}")
+        output.append(f"- **Complexity**: {complexity:.1f}")
+        output.append(f"- **Change Velocity**: {velocity} commits (30d)")
+        output.append(f"\n**Citation**: `{path}` (full module analysis)")
+        
+        return "\n".join(output)
+
+
+def create_navigator_tools(
+    knowledge_graph: KnowledgeGraph,
+    semantic_index_path: Optional[str] = None
+) -> List:
+    """Create LangChain tools for the Navigator agent."""
+    navigator = Navigator(knowledge_graph, semantic_index_path)
+    
+    @tool
+    def find_implementation(concept: str) -> str:
+        """
+        Find modules that implement a specific concept using semantic search.
+        
+        Use this tool when you need to find modules related to a feature or concept.
+        
+        Args:
+            concept: The concept to search for (e.g., "authentication", "payment processing")
+        
+        Returns:
+            Formatted string with matching modules and file paths
+        """
+        return navigator.find_implementation(concept)
+    
+    @tool
+    def trace_lineage(dataset: str, direction: str) -> str:
+        """
+        Trace data lineage to find upstream sources or downstream consumers.
+        
+        Use this tool to understand data flow through the system.
+        
+        Args:
+            dataset: The dataset name to trace
+            direction: Either "upstream" (sources) or "downstream" (consumers)
+        
+        Returns:
+            Formatted string with connected datasets and file paths
+        """
+        return navigator.trace_lineage(dataset, direction)
+    
+    @tool
+    def blast_radius(module_path: str) -> str:
+        """
+        Calculate blast radius to find all modules that depend on a given module.
+        
+        Use this tool to assess impact of changing a module.
+        
+        Args:
+            module_path: The file path of the module to analyze
+        
+        Returns:
+            Formatted string with dependent modules and impact count
+        """
+        return navigator.blast_radius(module_path)
+    
+    @tool
+    def explain_module(path: str) -> str:
+        """
+        Explain what a module does by retrieving its purpose and metadata.
+        
+        Use this tool to understand what a specific module does.
+        
+        Args:
+            path: The file path of the module to explain
+        
+        Returns:
+            Formatted string with purpose, metrics, and dependencies
+        """
+        return navigator.explain_module(path)
+    
+    return [find_implementation, trace_lineage, blast_radius, explain_module]
+
+
+if __name__ == "__main__":
+    from src.models.schema import ModuleNode, DatasetNode, ImportsEdge, ProducesEdge
+    
+    kg = KnowledgeGraph()
+    
+    kg.add_module_node(ModuleNode(
+        path="src/auth/login.py",
+        language="python",
+        complexity_score=15.0,
+        change_velocity_30d=10,
+        is_dead_code_candidate=False,
+        pagerank=0.05
+    ))
+    kg.graph.nodes["src/auth/login.py"]["purpose_statement"] = "Handles user authentication"
+    kg.graph.nodes["src/auth/login.py"]["domain_cluster"] = "Authentication"
+    
+    kg.add_module_node(ModuleNode(
+        path="src/api/users.py",
+        language="python",
+        complexity_score=20.0,
+        change_velocity_30d=15,
+        is_dead_code_candidate=False,
+        pagerank=0.03
+    ))
+    
+    kg.add_dataset_node(DatasetNode(
+        name="users_table",
+        storage_type="table",
+        schema_snapshot={"columns": ["id", "email"]}
+    ))
+    
+    kg.add_imports_edge(ImportsEdge(source="src/api/users.py", target="src/auth/login.py"))
+    kg.add_produces_edge(ProducesEdge(source="src/auth/login.py", target="users_table"))
+    
+    navigator = Navigator(kg)
+    
+    print("="*60)
+    print("Testing Navigator Tools")
+    print("="*60)
+    
+    print("\n1. Explain Module:")
+    print(navigator.explain_module("src/auth/login.py"))
+    
+    print("\n2. Blast Radius:")
+    print(navigator.blast_radius("src/auth/login.py"))
+    
+    print("\n3. Trace Lineage:")
+    print(navigator.trace_lineage("users_table", "upstream"))
