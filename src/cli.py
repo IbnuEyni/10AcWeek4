@@ -26,17 +26,9 @@ def query_command(args):
     # Load knowledge graph
     print(f"Loading knowledge graph from {graph_file}...")
     kg = KnowledgeGraph()
-    with open(graph_file, "r") as f:
-        graph_data = json.load(f)
+    kg.load_from_json(str(graph_file))  # Use the built-in load method
     
-    # Reconstruct graph
-    for node in graph_data.get("nodes", []):
-        kg.graph.add_node(node["id"], **{k: v for k, v in node.items() if k != "id"})
-    
-    for link in graph_data.get("links", []):
-        kg.graph.add_edge(link["source"], link["target"], **{k: v for k, v in link.items() if k not in ["source", "target"]})
-    
-    print(f"Loaded {len(kg.graph.nodes)} nodes, {len(kg.graph.edges)} edges")
+    print(f"Loaded {kg.graph.number_of_nodes()} nodes, {kg.graph.number_of_edges()} edges")
     
     # Check for semantic index
     semantic_index_exists = Path(semantic_index_path).exists()
