@@ -7,9 +7,12 @@ and module explanation using the knowledge graph and semantic index.
 
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+import os
 import chromadb
 from chromadb.utils import embedding_functions
 from langchain_core.tools import tool
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langgraph.prebuilt import create_react_agent
 from src.graph.knowledge_graph import KnowledgeGraph
 
 
@@ -313,6 +316,46 @@ def create_navigator_tools(
         return navigator.explain_module(path)
     
     return [find_implementation, trace_lineage, blast_radius, explain_module]
+
+
+def create_navigator_agent(
+    knowledge_graph: KnowledgeGraph,
+    semantic_index_path: Optional[str] = None
+):
+    """
+    Create a LangGraph ReAct agent for navigating the knowledge graph.
+    
+    Args:
+        knowledge_graph: The knowledge graph to query
+        semantic_index_path: Path to ChromaDB semantic index (optional)
+    
+    Returns:
+        Compiled LangGraph agent
+    
+    Raises:
+        ValueError: If GOOGLE_API_KEY or GEMINI_API_KEY is not set
+    """
+    # Check for API key
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+    if not api_key or api_key == "your_gemini_key":
+        raise ValueError(
+            "Google API key required. Set GOOGLE_API_KEY or GEMINI_API_KEY "
+            "environment variable in .env file."
+        )
+    
+    tools = create_navigator_tools(knowledge_graph, semantic_index_path)
+    
+    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp")
+    
+    system_prompt = (
+        "You are the Cartographer Navigator. You answer questions about the codebase "
+        "using ONLY the provided tools. You must always cite the file path, line number, "
+        "and analysis method used."
+    )
+    
+    agent = create_react_agent(llm, tools, state_modifier=system_prompt)
+    
+    return agent
 
 
 if __name__ == "__main__":
