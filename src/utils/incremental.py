@@ -14,23 +14,20 @@ class IncrementalTracker:
     
     def get_changed_files(self, since_commit: Optional[str] = None) -> Set[str]:
         """
-        Get list of files changed since last analysis or specific commit.
+        Get list of files changed since HEAD~1.
         
         Args:
-            since_commit: Git commit hash to compare against (None = last analysis)
+            since_commit: Git commit hash to compare against (None = HEAD~1)
         
         Returns:
             Set of relative file paths that have changed
         """
         if since_commit is None:
-            since_commit = self._get_last_commit()
-        
-        if not since_commit:
-            return self._get_all_tracked_files()
+            since_commit = "HEAD~1"
         
         try:
             result = subprocess.run(
-                ["git", "diff", "--name-only", since_commit, "HEAD"],
+                ["git", "diff", "--name-only", since_commit],
                 cwd=self.repo_path,
                 capture_output=True,
                 text=True,
@@ -38,12 +35,13 @@ class IncrementalTracker:
             )
             
             if result.returncode != 0:
+                print(f"IncrementalTracker: git diff failed, analyzing all files")
                 return self._get_all_tracked_files()
             
             changed_files = set(result.stdout.strip().split('\n'))
             changed_files = {f for f in changed_files if f}
             
-            print(f"IncrementalTracker: Found {len(changed_files)} changed files")
+            print(f"IncrementalTracker: Found {len(changed_files)} changed files since {since_commit}")
             return changed_files
         
         except Exception as e:

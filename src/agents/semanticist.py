@@ -372,7 +372,7 @@ Focus on:
             try:
                 # Get embedding using litellm
                 response = embedding(
-                    model="text-embedding-3-small",  # OpenAI's cheap embedding model
+                    model="gemini-2.5-flash",
                     input=[module["purpose"]]
                 )
                 

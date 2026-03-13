@@ -8,7 +8,7 @@ load_dotenv()
 
 
 def query_command(args):
-    """Handle the query command for interactive agent queries."""
+    """Handle the query command for Navigator agent queries."""
     from src.graph.knowledge_graph import KnowledgeGraph
     from src.agents.navigator import create_navigator_agent
     import json
@@ -53,32 +53,9 @@ def query_command(args):
         print(f"Error: {e}")
         return 1
     
-    # Interactive or single query mode
-    if args.interactive:
-        print("Interactive mode. Type 'exit' or 'quit' to stop.\n")
-        while True:
-            try:
-                query = input("Query> ").strip()
-                if query.lower() in ["exit", "quit", "q"]:
-                    break
-                if not query:
-                    continue
-                
-                result = agent.invoke({"messages": [("user", query)]})
-                print("\n" + result["messages"][-1].content + "\n")
-            except KeyboardInterrupt:
-                print("\nExiting...")
-                break
-            except Exception as e:
-                print(f"Error: {e}\n")
-    else:
-        # Single query mode
-        if not args.query:
-            print("Error: --query required in non-interactive mode")
-            return 1
-        
-        result = agent.invoke({"messages": [("user", args.query)]})
-        print(result["messages"][-1].content)
+    # Execute query
+    result = agent.invoke({"messages": [("user", args.question)]})
+    print(result["messages"][-1].content)
     
     return 0
 
@@ -90,9 +67,9 @@ def main():
         epilog="""
 Examples:
   python -m src.cli analyze --repo /path/to/repository
+  python -m src.cli analyze --repo . --incremental
   python -m src.cli analyze --repo . --llm
-  python -m src.cli query --repo . --interactive
-  python -m src.cli query --repo . --query "What does src/cli.py do?"
+  python -m src.cli query --repo . --question "What does src/cli.py do?"
         """
     )
     
@@ -112,7 +89,7 @@ Examples:
     analyze_parser.add_argument(
         "--incremental",
         action="store_true",
-        help="Only analyze files changed since last analysis"
+        help="Only analyze files changed since HEAD~1 (git diff --name-only HEAD~1)"
     )
     analyze_parser.add_argument(
         "--llm",
@@ -132,14 +109,10 @@ Examples:
         help="Path to repository (must have been analyzed)"
     )
     query_parser.add_argument(
-        "--query",
+        "--question",
         type=str,
-        help="Single query to execute"
-    )
-    query_parser.add_argument(
-        "--interactive",
-        action="store_true",
-        help="Start interactive query session"
+        required=True,
+        help="Question to ask the Navigator agent"
     )
     
     args = parser.parse_args()

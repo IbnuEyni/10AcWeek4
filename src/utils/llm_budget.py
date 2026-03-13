@@ -22,20 +22,20 @@ class ContextWindowBudget:
     # Model configurations with pricing (per 1M tokens)
     MODELS = {
         "cheap": {
-            "name": "openrouter/qwen/qwen-2.5-7b-instruct",
+            "name": "gemini/gemini-2.0-flash-exp",
             "input_cost": 0.0,
             "output_cost": 0.0,
-            "fallback": "openrouter/mistralai/mistral-7b-instruct",
-            "fallback_input_cost": 0.06,
-            "fallback_output_cost": 0.06,
+            "fallback": "gemini/gemini-1.5-flash",
+            "fallback_input_cost": 0.075,
+            "fallback_output_cost": 0.30,
         },
         "expensive": {
-            "name": "openrouter/qwen/qwen-2.5-7b-instruct",
-            "input_cost": 0.0,
-            "output_cost": 0.0,
-            "fallback": "openrouter/mistralai/mistral-7b-instruct",
-            "fallback_input_cost": 0.06,
-            "fallback_output_cost": 0.06,
+            "name": "deepseek/deepseek-chat",
+            "input_cost": 0.14,
+            "output_cost": 0.28,
+            "fallback": "deepseek/deepseek-coder",
+            "fallback_input_cost": 0.14,
+            "fallback_output_cost": 0.28,
         }
     }
     
@@ -44,16 +44,14 @@ class ContextWindowBudget:
         Initialize the budget tracker.
         
         Args:
-            api_key: OpenRouter API key (defaults to OPENROUTER_API_KEY env var)
+            api_key: Not used - LiteLLM reads GEMINI_API_KEY and DEEPSEEK_API_KEY from environment
         """
         self.total_tokens = 0
         self.total_cost = 0.0
         self.call_history = []
         
-        # Set API key
-        self.api_key = api_key or os.getenv("OPENROUTER_API_KEY")
-        if self.api_key:
-            os.environ["OPENROUTER_API_KEY"] = self.api_key
+        # LiteLLM automatically reads GEMINI_API_KEY and DEEPSEEK_API_KEY from environment
+        # No need to set API keys manually
         
         # Initialize tokenizer (using cl100k_base for GPT-4/3.5 compatibility)
         try:

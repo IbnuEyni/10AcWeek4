@@ -227,8 +227,8 @@ class Navigator:
 **Status**: Module not found in knowledge graph
 """
         
-        purpose = module_data.get("purpose_statement", "No purpose statement available")
-        domain = module_data.get("domain_cluster", "Unclustered")
+        purpose = module_data.get("purpose_statement") or "No purpose statement available"
+        domain = module_data.get("domain_cluster") or "Unclustered"
         pagerank = module_data.get("pagerank", 0.0) or 0.0
         complexity = module_data.get("complexity_score", 0.0) or 0.0
         velocity = module_data.get("change_velocity_30d", 0) or 0
@@ -345,7 +345,7 @@ def create_navigator_agent(
     
     tools = create_navigator_tools(knowledge_graph, semantic_index_path)
     
-    llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp")
+    llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     
     system_prompt = (
         "You are the Cartographer Navigator. You answer questions about the codebase "

@@ -357,13 +357,14 @@ The following modules are architectural hubs (highest PageRank scores):
         
         # Add top modules
         for i, module in enumerate(top_modules, 1):
+            purpose = module['purpose'] or "No purpose statement"
             content += f"""### {i}. {module['path']}
 
 - **PageRank**: {module['pagerank']:.4f}
 - **Domain**: {module['domain']}
 - **Complexity**: {module['complexity']:.1f}
 - **Change Velocity**: {module['velocity']} commits (30d)
-- **Purpose**: {module['purpose'][:200]}{'...' if len(module['purpose']) > 200 else ''}
+- **Purpose**: {purpose[:200]}{'...' if len(purpose) > 200 else ''}
 
 """
         
