@@ -5,6 +5,8 @@ from src.agents.hydrologist import Hydrologist
 from src.agents.semanticist import Semanticist
 from src.agents.archivist import Archivist
 from src.utils.incremental import IncrementalTracker
+from src.utils.tracer import CartographyTracer
+import time
 
 
 def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool = False):
@@ -15,8 +17,22 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
         repo_path: Path to repository root
         incremental: If True, only analyze changed files since last run
         enable_llm: If True, run Semanticist agent for LLM-powered analysis
-    """""
+    """
     repo = Path(repo_path)
+    
+    # Initialize tracer
+    tracer = CartographyTracer(str(repo / ".cartography" / "cartography_trace.jsonl"))
+    tracer.log_action(
+        agent="Orchestrator",
+        action="start_analysis",
+        target=str(repo),
+        evidence=f"Mode: {'Incremental' if incremental else 'Full'}, LLM: {enable_llm}",
+        confidence="1.0"
+    )
+    
+    # Performance tracking
+    start_time = time.time()
+    timings = {}
     
     print("="*60)
     print("Brownfield Cartographer - Codebase Intelligence System")
@@ -28,39 +44,68 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
     tracker = None
     changed_files = None
     if incremental:
+        tracker_start = time.time()
         tracker = IncrementalTracker(str(repo))
         changed_files = tracker.get_changed_files()
+        timings['incremental_tracker'] = time.time() - tracker_start
+        
+        tracer.log_action(
+            agent="IncrementalTracker",
+            action="detect_changes",
+            target=str(repo),
+            evidence=f"Found {len(changed_files)} changed files",
+            confidence="1.0"
+        )
         
         if not changed_files:
             print("No changes detected since last analysis. Skipping.")
+            tracer.log_action(
+                agent="Orchestrator",
+                action="skip_analysis",
+                target=str(repo),
+                evidence="No changes detected",
+                confidence="1.0"
+            )
             return
         
         print(f"Analyzing {len(changed_files)} changed files...\n")
     
     # Initialize Knowledge Graph
     kg = KnowledgeGraph()
+    tracer.log_action(
+        agent="Orchestrator",
+        action="initialize_graph",
+        target="KnowledgeGraph",
+        evidence="Created empty NetworkX DiGraph",
+        confidence="1.0"
+    )
     
     # Run Surveyor Agent (Static Analysis)
     print("\n" + "="*60)
-    surveyor = Surveyor(kg)
+    surveyor_start = time.time()
+    surveyor = Surveyor(kg, tracer=tracer)
     if incremental and changed_files:
         surveyor.run(str(repo), changed_files=changed_files)
     else:
         surveyor.run(str(repo))
+    timings['surveyor'] = time.time() - surveyor_start
     
     # Run Hydrologist Agent (Data Lineage)
     print("\n" + "="*60)
-    hydrologist = Hydrologist(kg)
+    hydrologist_start = time.time()
+    hydrologist = Hydrologist(kg, tracer=tracer)
     if incremental and changed_files:
         hydrologist.run(str(repo), changed_files=changed_files)
     else:
         hydrologist.run(str(repo))
+    timings['hydrologist'] = time.time() - hydrologist_start
     
     # Run Semanticist Agent (LLM-Powered Semantic Analysis) - Optional
     day_one_answers = None
     if enable_llm:
         print("\n" + "="*60)
-        semanticist = Semanticist(kg)
+        semanticist_start = time.time()
+        semanticist = Semanticist(kg, tracer=tracer)
         semanticist.generate_purpose_statements(str(repo))
         
         # Cluster into domains
@@ -68,6 +113,7 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
         
         # Answer Day-One Questions
         day_one_answers = semanticist.answer_day_one_questions()
+        timings['semanticist'] = time.time() - semanticist_start
         
         # Save Day-One answers
         day_one_path = repo / ".cartography" / "day_one_questions.md"
@@ -123,25 +169,99 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
     
     # Run Archivist Agent (Documentation Generation)
     print("\n" + "="*60)
-    archivist = Archivist(kg)
+    print("Archivist: Generating Documentation")
+    print("="*60)
     
-    # Generate CODEBASE.md
-    codebase_path = archivist.generate_CODEBASE_md(str(repo / ".cartography"))
-    print(f"✓ CODEBASE.md generated: {codebase_path}")
+    archivist_start = time.time()
+    archivist = Archivist(kg, tracer=tracer)
+    
+    # Always generate CODEBASE.md (works with or without LLM)
+    try:
+        codebase_path = archivist.generate_CODEBASE_md(str(repo / ".cartography"))
+        print(f"\n✓ CODEBASE.md generated: {codebase_path}")
+        tracer.log_action(
+            agent="Archivist",
+            action="generate_codebase_md",
+            target=str(codebase_path),
+            evidence=f"Generated documentation for {kg.graph.number_of_nodes()} nodes",
+            confidence="1.0"
+        )
+    except Exception as e:
+        print(f"\n✗ Error generating CODEBASE.md: {e}")
+        tracer.log_error(
+            agent="Archivist",
+            action="generate_codebase_md",
+            target="CODEBASE.md",
+            error_message=str(e)
+        )
     
     # Generate onboarding brief if Day-One answers available
     if day_one_answers:
-        brief_path = archivist.generate_onboarding_brief(
-            day_one_answers,
-            str(repo / ".cartography")
-        )
-        print(f"✓ onboarding_brief.md generated: {brief_path}")
+        try:
+            brief_path = archivist.generate_onboarding_brief(
+                day_one_answers,
+                str(repo / ".cartography")
+            )
+            print(f"✓ onboarding_brief.md generated: {brief_path}")
+            tracer.log_action(
+                agent="Archivist",
+                action="generate_onboarding_brief",
+                target=str(brief_path),
+                evidence="Generated FDE Day-One onboarding brief",
+                confidence="1.0"
+            )
+        except Exception as e:
+            print(f"✗ Error generating onboarding_brief.md: {e}")
+            tracer.log_error(
+                agent="Archivist",
+                action="generate_onboarding_brief",
+                target="onboarding_brief.md",
+                error_message=str(e)
+            )
     
     # Build semantic index if LLM analysis was run
     if enable_llm:
-        index_path = archivist.build_semantic_index(str(repo / ".cartography"))
-        print(f"✓ Semantic index built: {index_path}")
+        try:
+            index_path = archivist.build_semantic_index(str(repo / ".cartography"))
+            print(f"✓ Semantic index built: {index_path}")
+            tracer.log_action(
+                agent="Archivist",
+                action="build_semantic_index",
+                target=str(index_path),
+                evidence="Built ChromaDB semantic search index",
+                confidence="1.0"
+            )
+        except Exception as e:
+            print(f"✗ Error building semantic index: {e}")
+            tracer.log_error(
+                agent="Archivist",
+                action="build_semantic_index",
+                target="semantic_index",
+                error_message=str(e)
+            )
+    
+    timings['archivist'] = time.time() - archivist_start
+    
+    # Print performance summary
+    total_time = time.time() - start_time
+    timings['total'] = total_time
+    
+    print("\n" + "="*60)
+    print("Performance Summary")
+    print("="*60)
+    for component, duration in sorted(timings.items()):
+        print(f"  {component:25} {duration:8.2f}s")
+    
+    tracer.log_action(
+        agent="Orchestrator",
+        action="complete_analysis",
+        target=str(repo),
+        evidence=f"Total time: {total_time:.2f}s, Nodes: {kg.graph.number_of_nodes()}, Edges: {kg.graph.number_of_edges()}",
+        confidence="1.0"
+    )
     
     print("\n" + "="*60)
     print("✓ Cartography complete!")
     print("="*60)
+    print(f"\nTrace file: {repo / '.cartography' / 'cartography_trace.jsonl'}")
+    tracer.print_summary()
