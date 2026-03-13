@@ -23,7 +23,7 @@ class Archivist:
     - Build semantic search index with ChromaDB
     """
     
-    def __init__(self, knowledge_graph: KnowledgeGraph):
+    def __init__(self, knowledge_graph: KnowledgeGraph, tracer=None):
         """
         Initialize the Archivist agent.
         
@@ -31,6 +31,7 @@ class Archivist:
             knowledge_graph: The knowledge graph to document
         """
         self.kg = knowledge_graph
+        self.tracer = tracer
     
     def generate_CODEBASE_md(self, output_dir: str) -> str:
         """
@@ -459,13 +460,13 @@ Complete index of all modules with purpose statements:
         # Group modules by domain
         modules_by_domain = {}
         for module in modules:
-            domain = module['domain']
+            domain = module['domain'] or "Unclustered"  # Handle None domains
             if domain not in modules_by_domain:
                 modules_by_domain[domain] = []
             modules_by_domain[domain].append(module)
         
-        # Add modules by domain
-        for domain in sorted(modules_by_domain.keys()):
+        # Add modules by domain (sort with None-safe key)
+        for domain in sorted(modules_by_domain.keys(), key=lambda x: (x is None, x)):
             domain_modules = modules_by_domain[domain]
             content += f"\n### {domain} ({len(domain_modules)} modules)\n\n"
             

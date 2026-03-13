@@ -8,9 +8,10 @@ from src.models.schema import ModuleNode, FunctionNode, ImportsEdge
 
 
 class Surveyor:
-    def __init__(self, knowledge_graph: KnowledgeGraph):
+    def __init__(self, knowledge_graph: KnowledgeGraph, tracer=None):
         self.kg = knowledge_graph
         self.analyzer = LanguageRouter()
+        self.tracer = tracer
     
     def run(self, repo_path: str, changed_files: set = None):
         """
@@ -22,6 +23,15 @@ class Surveyor:
         """
         repo = Path(repo_path)
         print(f"Surveyor: Analyzing repository at {repo}")
+        
+        if self.tracer:
+            self.tracer.log_action(
+                agent="Surveyor",
+                action="start_analysis",
+                target=str(repo),
+                evidence=f"Incremental: {changed_files is not None}",
+                confidence="1.0"
+            )
         
         # Find all Python files
         py_files = list(repo.rglob("*.py"))
@@ -38,6 +48,13 @@ class Surveyor:
                 self._analyze_python_file(py_file, repo)
             except Exception as e:
                 print(f"Surveyor: Error analyzing {py_file}: {e}")
+                if self.tracer:
+                    self.tracer.log_error(
+                        agent="Surveyor",
+                        action="analyze_file",
+                        target=str(py_file),
+                        error_message=str(e)
+                    )
         
         # Calculate PageRank for architectural hubs
         self._calculate_pagerank()

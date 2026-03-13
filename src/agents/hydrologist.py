@@ -8,8 +8,9 @@ from src.models.schema import DatasetNode, TransformationNode, ProducesEdge, Con
 
 
 class Hydrologist:
-    def __init__(self, knowledge_graph: KnowledgeGraph):
+    def __init__(self, knowledge_graph: KnowledgeGraph, tracer=None):
         self.kg = knowledge_graph
+        self.tracer = tracer
     
     def run(self, repo_path: str, changed_files: set = None):
         """

@@ -21,7 +21,7 @@ class Semanticist:
     and detect documentation drift.
     """
     
-    def __init__(self, knowledge_graph: KnowledgeGraph):
+    def __init__(self, knowledge_graph: KnowledgeGraph, tracer=None):
         """
         Initialize the Semanticist agent.
         
@@ -29,6 +29,7 @@ class Semanticist:
             knowledge_graph: The knowledge graph to enrich with semantic analysis
         """
         self.kg = knowledge_graph
+        self.tracer = tracer
         self.budget = ContextWindowBudget()
         self.analysis_results = {
             "modules_analyzed": 0,
