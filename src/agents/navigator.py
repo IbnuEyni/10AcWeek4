@@ -353,7 +353,8 @@ def create_navigator_agent(
         "and analysis method used."
     )
     
-    agent = create_react_agent(llm, tools, state_modifier=system_prompt)
+    # Use prompt parameter for system message
+    agent = create_react_agent(llm, tools, prompt=system_prompt)
     
     return agent
 
