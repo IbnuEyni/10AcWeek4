@@ -1,0 +1,28 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "node_type": "module",
+      "path": "main.py",
+      "language": "python",
+      "purpose_statement": null,
+      "domain_cluster": null,
+      "complexity_score": 1.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": false,
+      "pagerank": 1.0,
+      "id": "main.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "main.py::hello",
+      "signature": "hello",
+      "is_public_api": true,
+      "id": "main.py::hello"
+    }
+  ],
+  "edges": []
+}

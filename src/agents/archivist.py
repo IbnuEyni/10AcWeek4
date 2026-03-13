@@ -223,15 +223,15 @@ class Archivist:
             if data.get("node_type") == "module":
                 modules.append({
                     "id": node_id,
-                    "path": data.get("path"),
+                    "path": data.get("path", node_id),
                     "language": data.get("language", "unknown"),
                     "purpose": data.get("purpose_statement", "No purpose statement"),
                     "domain": data.get("domain_cluster", "Unclustered"),
-                    "pagerank": data.get("pagerank", 0.0),
-                    "complexity": data.get("complexity_score", 0.0),
-                    "velocity": data.get("change_velocity_30d", 0),
-                    "is_dead_code": data.get("is_dead_code_candidate", False),
-                    "has_drift": data.get("has_documentation_drift", False)
+                    "pagerank": data.get("pagerank", 0.0) or 0.0,
+                    "complexity": data.get("complexity_score", 0.0) or 0.0,
+                    "velocity": data.get("change_velocity_30d", 0) or 0,
+                    "is_dead_code": data.get("is_dead_code_candidate", False) or False,
+                    "has_drift": data.get("has_documentation_drift", False) or False
                 })
         return modules
     

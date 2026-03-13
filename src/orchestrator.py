@@ -3,6 +3,7 @@ from src.graph.knowledge_graph import KnowledgeGraph
 from src.agents.surveyor import Surveyor
 from src.agents.hydrologist import Hydrologist
 from src.agents.semanticist import Semanticist
+from src.agents.archivist import Archivist
 from src.utils.incremental import IncrementalTracker
 
 
@@ -56,6 +57,7 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
         hydrologist.run(str(repo))
     
     # Run Semanticist Agent (LLM-Powered Semantic Analysis) - Optional
+    day_one_answers = None
     if enable_llm:
         print("\n" + "="*60)
         semanticist = Semanticist(kg)
@@ -118,6 +120,27 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
     # Save incremental state if enabled
     if incremental and tracker:
         tracker.save_state()
+    
+    # Run Archivist Agent (Documentation Generation)
+    print("\n" + "="*60)
+    archivist = Archivist(kg)
+    
+    # Generate CODEBASE.md
+    codebase_path = archivist.generate_CODEBASE_md(str(repo / ".cartography"))
+    print(f"✓ CODEBASE.md generated: {codebase_path}")
+    
+    # Generate onboarding brief if Day-One answers available
+    if day_one_answers:
+        brief_path = archivist.generate_onboarding_brief(
+            day_one_answers,
+            str(repo / ".cartography")
+        )
+        print(f"✓ onboarding_brief.md generated: {brief_path}")
+    
+    # Build semantic index if LLM analysis was run
+    if enable_llm:
+        index_path = archivist.build_semantic_index(str(repo / ".cartography"))
+        print(f"✓ Semantic index built: {index_path}")
     
     print("\n" + "="*60)
     print("✓ Cartography complete!")
