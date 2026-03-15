@@ -57,17 +57,21 @@ class Hydrologist:
         """Analyze a single SQL file and add to knowledge graph."""
         relative_path = str(file_path.relative_to(repo_root))
         
-        # Read SQL content
         try:
             sql_content = file_path.read_text()
         except Exception as e:
             print(f"Hydrologist: Error reading {file_path}: {e}")
             return
         
-        # Extract SQL dependencies
-        lineage = extract_sql_dependencies(sql_content, dialect="postgres")
+        # Detect dialect from file path or content
+        dialect = "postgres"
+        if "bigquery" in str(file_path).lower() or "bq" in str(file_path).lower():
+            dialect = "bigquery"
+        elif "snowflake" in str(file_path).lower() or "sf" in str(file_path).lower():
+            dialect = "snowflake"
         
-        # Create transformation node for this SQL file
+        lineage = extract_sql_dependencies(sql_content, dialect=dialect)
+        
         transformation_node = TransformationNode(
             source_file=relative_path,
             logic_type="sql_transform"
@@ -79,8 +83,6 @@ class Hydrologist:
             **transformation_node.model_dump()
         )
         
-        # Create target dataset (the output of this SQL file)
-        # For dbt models, the target is typically the filename without extension
         target_name = file_path.stem
         target_dataset = DatasetNode(
             name=target_name,
@@ -89,16 +91,16 @@ class Hydrologist:
         )
         self.kg.add_dataset_node(target_dataset)
         
-        # Add PRODUCES edge from transformation to target
-        produces_edge = ProducesEdge(
-            source=transformation_id,
-            target=target_name
+        # Add edge with metadata
+        self.kg.graph.add_edge(
+            transformation_id,
+            target_name,
+            edge_type="PRODUCES",
+            transformation_type="sql",
+            source_line=1
         )
-        self.kg.add_produces_edge(produces_edge)
         
-        # Process source tables
         for source_table in lineage.get("sources", []):
-            # Create dataset node for source
             source_dataset = DatasetNode(
                 name=source_table,
                 storage_type="table",
@@ -106,14 +108,14 @@ class Hydrologist:
             )
             self.kg.add_dataset_node(source_dataset)
             
-            # Add CONSUMES edge from transformation to source
-            consumes_edge = ConsumesEdge(
-                source=transformation_id,
-                target=source_table
+            self.kg.graph.add_edge(
+                transformation_id,
+                source_table,
+                edge_type="CONSUMES",
+                transformation_type="sql",
+                source_line=1
             )
-            self.kg.add_consumes_edge(consumes_edge)
         
-        # Process explicit target tables from INSERT/CREATE statements
         for target_table in lineage.get("targets", []):
             if target_table != target_name:
                 target_dataset = DatasetNode(
@@ -123,11 +125,13 @@ class Hydrologist:
                 )
                 self.kg.add_dataset_node(target_dataset)
                 
-                produces_edge = ProducesEdge(
-                    source=transformation_id,
-                    target=target_table
+                self.kg.graph.add_edge(
+                    transformation_id,
+                    target_table,
+                    edge_type="PRODUCES",
+                    transformation_type="sql",
+                    source_line=1
                 )
-                self.kg.add_produces_edge(produces_edge)
     
     def _analyze_yaml_config(self, file_path: Path, repo_root: Path):
         """Analyze YAML config file for pipeline metadata."""
@@ -246,3 +250,21 @@ class Hydrologist:
         except Exception as e:
             print(f"Hydrologist: Error tracing downstream: {e}")
             return {}
+    
+    def find_sources(self) -> Set[str]:
+        """Find all source datasets (nodes with no incoming edges)."""
+        sources = set()
+        for node, data in self.kg.graph.nodes(data=True):
+            if data.get('node_type') == 'dataset':
+                if self.kg.graph.in_degree(node) == 0:
+                    sources.add(node)
+        return sources
+    
+    def find_sinks(self) -> Set[str]:
+        """Find all sink datasets (nodes with no outgoing edges)."""
+        sinks = set()
+        for node, data in self.kg.graph.nodes(data=True):
+            if data.get('node_type') == 'dataset':
+                if self.kg.graph.out_degree(node) == 0:
+                    sinks.add(node)
+        return sinks

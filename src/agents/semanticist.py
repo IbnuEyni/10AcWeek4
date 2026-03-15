@@ -373,7 +373,7 @@ Focus on:
             try:
                 # Get embedding using litellm
                 response = embedding(
-                    model="gemini-2.5-flash",
+                    model="deepseek/deepseek-chat",
                     input=[module["purpose"]]
                 )
                 
