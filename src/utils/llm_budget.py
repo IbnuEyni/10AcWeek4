@@ -22,12 +22,12 @@ class ContextWindowBudget:
     # Model configurations with pricing (per 1M tokens)
     MODELS = {
         "cheap": {
-            "name": "gemini/gemini-2.0-flash-exp",
-            "input_cost": 0.0,
-            "output_cost": 0.0,
-            "fallback": "gemini/gemini-1.5-flash",
-            "fallback_input_cost": 0.075,
-            "fallback_output_cost": 0.30,
+            "name": "deepseek/deepseek-chat",
+            "input_cost": 0.14,
+            "output_cost": 0.28,
+            "fallback": "deepseek/deepseek-coder",
+            "fallback_input_cost": 0.14,
+            "fallback_output_cost": 0.28,
         },
         "expensive": {
             "name": "deepseek/deepseek-chat",
@@ -36,7 +36,7 @@ class ContextWindowBudget:
             "fallback": "deepseek/deepseek-coder",
             "fallback_input_cost": 0.14,
             "fallback_output_cost": 0.28,
-        }
+        },
     }
     
     def __init__(self, api_key: Optional[str] = None):
