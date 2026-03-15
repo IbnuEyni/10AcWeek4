@@ -84,20 +84,28 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
     print("\n" + "="*60)
     surveyor_start = time.time()
     surveyor = Surveyor(kg, tracer=tracer)
-    if incremental and changed_files:
-        surveyor.run(str(repo), changed_files=changed_files)
-    else:
-        surveyor.run(str(repo))
+    try:
+        if incremental and changed_files:
+            surveyor.run(str(repo), changed_files=changed_files)
+        else:
+            surveyor.run(str(repo))
+    except Exception as e:
+        print(f"\nWarning: Surveyor encountered errors: {e}")
+        tracer.log_error("Surveyor", "run", str(repo), str(e))
     timings['surveyor'] = time.time() - surveyor_start
     
     # Run Hydrologist Agent (Data Lineage)
     print("\n" + "="*60)
     hydrologist_start = time.time()
     hydrologist = Hydrologist(kg, tracer=tracer)
-    if incremental and changed_files:
-        hydrologist.run(str(repo), changed_files=changed_files)
-    else:
-        hydrologist.run(str(repo))
+    try:
+        if incremental and changed_files:
+            hydrologist.run(str(repo), changed_files=changed_files)
+        else:
+            hydrologist.run(str(repo))
+    except Exception as e:
+        print(f"\nWarning: Hydrologist encountered errors: {e}")
+        tracer.log_error("Hydrologist", "run", str(repo), str(e))
     timings['hydrologist'] = time.time() - hydrologist_start
     
     # Run Semanticist Agent (LLM-Powered Semantic Analysis) - Optional
@@ -105,23 +113,20 @@ def run_cartographer(repo_path: str, incremental: bool = False, enable_llm: bool
     if enable_llm:
         print("\n" + "="*60)
         semanticist_start = time.time()
-        semanticist = Semanticist(kg, tracer=tracer)
-        semanticist.generate_purpose_statements(str(repo))
-        
-        # Cluster into domains
-        semanticist.cluster_into_domains(k=5)
-        
-        # Answer Day-One Questions
-        day_one_answers = semanticist.answer_day_one_questions()
+        try:
+            semanticist = Semanticist(kg, tracer=tracer)
+            semanticist.generate_purpose_statements(str(repo))
+            semanticist.cluster_into_domains(k=5)
+            day_one_answers = semanticist.answer_day_one_questions()
+            
+            day_one_path = repo / ".cartography" / "day_one_questions.md"
+            day_one_path.write_text(day_one_answers, encoding='utf-8')
+            print(f"✓ Day-One answers saved to: {day_one_path}")
+            semanticist.print_drift_report()
+        except Exception as e:
+            print(f"\nWarning: Semanticist encountered errors: {e}")
+            tracer.log_error("Semanticist", "run", str(repo), str(e))
         timings['semanticist'] = time.time() - semanticist_start
-        
-        # Save Day-One answers
-        day_one_path = repo / ".cartography" / "day_one_questions.md"
-        day_one_path.write_text(day_one_answers, encoding='utf-8')
-        print(f"✓ Day-One answers saved to: {day_one_path}")
-        
-        # Print reports
-        semanticist.print_drift_report()
     
     # Save results
     print("\n" + "="*60)

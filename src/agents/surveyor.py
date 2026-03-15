@@ -8,10 +8,11 @@ from src.models.schema import ModuleNode, FunctionNode, ImportsEdge
 
 
 class Surveyor:
-    def __init__(self, knowledge_graph: KnowledgeGraph, tracer=None):
+    def __init__(self, knowledge_graph: KnowledgeGraph, tracer=None, velocity_days: int = 30):
         self.kg = knowledge_graph
         self.analyzer = LanguageRouter()
         self.tracer = tracer
+        self.velocity_days = velocity_days
     
     def run(self, repo_path: str, changed_files: set = None):
         """
@@ -62,6 +63,9 @@ class Surveyor:
         # Detect circular dependencies
         self._detect_circular_dependencies()
         
+        # Print summarized reports
+        self._print_impact_report()
+        
         print("Surveyor: Analysis complete")
     
     def _analyze_python_file(self, file_path: Path, repo_root: Path):
@@ -109,18 +113,9 @@ class Surveyor:
             self.kg.add_imports_edge(import_edge)
     
     def _calculate_change_velocity(self, file_path: Path, repo_root: Path) -> int:
-        """
-        Calculate number of commits in last 30 days for a file.
-        
-        Args:
-            file_path: Path to file
-            repo_root: Repository root path
-        
-        Returns:
-            Number of commits in last 30 days
-        """
+        """Calculate number of commits in configurable time window for a file."""
         try:
-            # Get commit dates for the file
+            cutoff_date = datetime.now() - timedelta(days=self.velocity_days)
             result = subprocess.run(
                 ["git", "log", "--follow", "--format=%Y", "--", str(file_path)],
                 cwd=repo_root,
@@ -132,15 +127,11 @@ class Surveyor:
             if result.returncode != 0:
                 return 0
             
-            # Parse years and count commits in last 30 days
-            cutoff_date = datetime.now() - timedelta(days=30)
             commit_count = 0
-            
             for line in result.stdout.strip().split('\n'):
                 if line:
                     try:
                         year = int(line)
-                        # Simple heuristic: if year matches current year, count it
                         if year == datetime.now().year:
                             commit_count += 1
                     except ValueError:
@@ -149,7 +140,6 @@ class Surveyor:
             return commit_count
         
         except (subprocess.TimeoutExpired, FileNotFoundError, Exception) as e:
-            print(f"Surveyor: Error calculating git velocity for {file_path}: {e}")
             return 0
     
     def _module_to_path(self, module_name: str) -> str:
@@ -234,3 +224,24 @@ class Surveyor:
         
         except Exception as e:
             print(f"Surveyor: Error detecting circular dependencies: {e}")
+    
+    def _print_impact_report(self):
+        """Print summarized report of highest-impact modules and hotspots."""
+        modules = [(n, d) for n, d in self.kg.graph.nodes(data=True) if d.get('node_type') == 'module']
+        
+        if not modules:
+            return
+        
+        # High-churn hotspots
+        hotspots = sorted(modules, key=lambda x: x[1].get('change_velocity_30d', 0), reverse=True)[:5]
+        if any(h[1].get('change_velocity_30d', 0) > 0 for h in hotspots):
+            print(f"\nSurveyor: Top 5 High-Churn Hotspots (last {self.velocity_days} days):")
+            for node, data in hotspots:
+                velocity = data.get('change_velocity_30d', 0)
+                if velocity > 0:
+                    print(f"  {node}: {velocity} commits")
+        
+        # Dead code candidates
+        dead_code = [n for n, d in modules if d.get('is_dead_code_candidate', False)]
+        if dead_code:
+            print(f"\nSurveyor: Dead Code Candidates: {len(dead_code)} modules with 0 commits")
