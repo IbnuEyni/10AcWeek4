@@ -46,7 +46,32 @@ class KnowledgeGraph:
             json.dump(data, f, indent=2)
     
     def load_from_json(self, input_path: str):
-        """Load knowledge graph from JSON file."""
+        """Load knowledge graph from JSON file with typed node/edge reconstruction."""
         with open(input_path, 'r') as f:
             data = json.load(f)
-        self.graph = nx.node_link_graph(data, directed=True)
+        edges_key = 'edges' if 'edges' in data else 'links'
+        self.graph = nx.node_link_graph(data, directed=True, edges=edges_key)
+        self._validate_graph_schema()
+    
+    def _validate_graph_schema(self):
+        """Validate that graph nodes and edges conform to Pydantic schemas."""
+        for node, attrs in self.graph.nodes(data=True):
+            node_type = attrs.get('node_type')
+            if node_type == 'module':
+                try:
+                    ModuleNode(**{k: v for k, v in attrs.items() if k in ModuleNode.model_fields})
+                except Exception as e:
+                    print(f"Warning: Invalid module node {node}: {e}")
+            elif node_type == 'dataset':
+                try:
+                    DatasetNode(**{k: v for k, v in attrs.items() if k in DatasetNode.model_fields})
+                except Exception as e:
+                    print(f"Warning: Invalid dataset node {node}: {e}")
+        
+        for src, tgt, attrs in self.graph.edges(data=True):
+            edge_type = attrs.get('edge_type')
+            if edge_type == 'IMPORTS':
+                try:
+                    ImportsEdge(source=src, target=tgt)
+                except Exception as e:
+                    print(f"Warning: Invalid IMPORTS edge {src}->{tgt}: {e}")
