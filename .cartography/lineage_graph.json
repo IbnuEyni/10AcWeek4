@@ -1,0 +1,1675 @@
+{
+  "directed": true,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "node_type": "module",
+      "path": "test_select_exclude_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot selection and exclusion functionality, ensuring that users can selectively run specific snapshots using --select and --exclude flags. It validates that snapshot filtering works correctly with both basic and configured snapshot definitions, verifying that only intended snapshots are created or updated during dbt runs.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 26.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": false,
+      "pagerank": 0.052631578947368404,
+      "id": "test_select_exclude_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::all_snapshots",
+      "signature": "all_snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::all_snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::exclude_snapshots",
+      "signature": "exclude_snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::exclude_snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::select_snapshots",
+      "signature": "select_snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::select_snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::SelectBasicSetup",
+      "signature": "SelectBasicSetup",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::SelectBasicSetup"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::seeds",
+      "signature": "seeds",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::seeds"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::macros",
+      "signature": "macros",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::macros"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::TestAllBasic",
+      "signature": "TestAllBasic",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::TestAllBasic"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::test_all_snapshots",
+      "signature": "test_all_snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::test_all_snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::TestExcludeBasic",
+      "signature": "TestExcludeBasic",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::TestExcludeBasic"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::test_exclude_snapshots",
+      "signature": "test_exclude_snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::test_exclude_snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::TestSelectBasic",
+      "signature": "TestSelectBasic",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::TestSelectBasic"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::test_select_snapshots",
+      "signature": "test_select_snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::test_select_snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::SelectConfiguredSetup",
+      "signature": "SelectConfiguredSetup",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::SelectConfiguredSetup"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::project_config_update",
+      "signature": "project_config_update",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::project_config_update"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::TestConfigured",
+      "signature": "TestConfigured",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::TestConfigured"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::test_all_configured_snapshots",
+      "signature": "test_all_configured_snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::test_all_configured_snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::TestConfiguredExclude",
+      "signature": "TestConfiguredExclude",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::TestConfiguredExclude"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::test_exclude_configured_snapshots",
+      "signature": "test_exclude_configured_snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::test_exclude_configured_snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::TestConfiguredSelect",
+      "signature": "TestConfiguredSelect",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::TestConfiguredSelect"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_select_exclude_snapshot.py::test_select_configured_snapshots",
+      "signature": "test_select_configured_snapshots",
+      "is_public_api": true,
+      "id": "test_select_exclude_snapshot.py::test_select_configured_snapshots"
+    },
+    {
+      "id": "os.py"
+    },
+    {
+      "id": "pytest.py"
+    },
+    {
+      "id": "dbt/tests/util.py"
+    },
+    {
+      "id": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "node_type": "module",
+      "path": "test_basic_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module contains integration tests for dbt's snapshot functionality, which enables tracking historical changes to data over time. It validates that snapshots correctly capture data changes using different strategies (check, timestamp), custom configurations, and schema variations. These tests ensure data lineage and historical accuracy for business intelligence and compliance reporting.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 71.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_basic_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::snapshot_setup",
+      "signature": "snapshot_setup",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::snapshot_setup"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::ref_setup",
+      "signature": "ref_setup",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::ref_setup"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::Basic",
+      "signature": "Basic",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::Basic"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::macros",
+      "signature": "macros",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::macros"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::seeds",
+      "signature": "seeds",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::seeds"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestBasicSnapshot",
+      "signature": "TestBasicSnapshot",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestBasicSnapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_basic_snapshot",
+      "signature": "test_basic_snapshot",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_basic_snapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestBasicRef",
+      "signature": "TestBasicRef",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestBasicRef"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_basic_ref",
+      "signature": "test_basic_ref",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_basic_ref"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestBasicTargetSchemaConfig",
+      "signature": "TestBasicTargetSchemaConfig",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestBasicTargetSchemaConfig"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::project_config_update",
+      "signature": "project_config_update",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::project_config_update"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_target_schema",
+      "signature": "test_target_schema",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_target_schema"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::CustomNamespace",
+      "signature": "CustomNamespace",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::CustomNamespace"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestBasicCustomNamespace",
+      "signature": "TestBasicCustomNamespace",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestBasicCustomNamespace"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_custom_namespace_snapshot",
+      "signature": "test_custom_namespace_snapshot",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_custom_namespace_snapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestRefCustomNamespace",
+      "signature": "TestRefCustomNamespace",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestRefCustomNamespace"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_custom_namespace_ref",
+      "signature": "test_custom_namespace_ref",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_custom_namespace_ref"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::CustomSnapshot",
+      "signature": "CustomSnapshot",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::CustomSnapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestBasicCustomSnapshot",
+      "signature": "TestBasicCustomSnapshot",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestBasicCustomSnapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_custom_snapshot",
+      "signature": "test_custom_snapshot",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_custom_snapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestRefCustomSnapshot",
+      "signature": "TestRefCustomSnapshot",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestRefCustomSnapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_custom_ref",
+      "signature": "test_custom_ref",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_custom_ref"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::CheckCols",
+      "signature": "CheckCols",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::CheckCols"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestBasicCheckCols",
+      "signature": "TestBasicCheckCols",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestBasicCheckCols"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestRefCheckCols",
+      "signature": "TestRefCheckCols",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestRefCheckCols"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_check_cols_ref",
+      "signature": "test_check_cols_ref",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_check_cols_ref"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::ConfiguredCheckCols",
+      "signature": "ConfiguredCheckCols",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::ConfiguredCheckCols"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestBasicConfiguredCheckCols",
+      "signature": "TestBasicConfiguredCheckCols",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestBasicConfiguredCheckCols"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_configured_snapshot",
+      "signature": "test_configured_snapshot",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_configured_snapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestRefConfiguredCheckCols",
+      "signature": "TestRefConfiguredCheckCols",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestRefConfiguredCheckCols"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_configured_ref",
+      "signature": "test_configured_ref",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_configured_ref"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::UpdatedAtCheckCols",
+      "signature": "UpdatedAtCheckCols",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::UpdatedAtCheckCols"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestBasicUpdatedAtCheckCols",
+      "signature": "TestBasicUpdatedAtCheckCols",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestBasicUpdatedAtCheckCols"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_updated_at_snapshot",
+      "signature": "test_updated_at_snapshot",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_updated_at_snapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestRefUpdatedAtCheckCols",
+      "signature": "TestRefUpdatedAtCheckCols",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestRefUpdatedAtCheckCols"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_updated_at_ref",
+      "signature": "test_updated_at_ref",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_updated_at_ref"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::BasicYaml",
+      "signature": "BasicYaml",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::BasicYaml"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestBasicSnapshotYaml",
+      "signature": "TestBasicSnapshotYaml",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestBasicSnapshotYaml"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_basic_snapshot_yaml",
+      "signature": "test_basic_snapshot_yaml",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_basic_snapshot_yaml"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestYamlSnapshotCompiledPath",
+      "signature": "TestYamlSnapshotCompiledPath",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestYamlSnapshotCompiledPath"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_compiled_path",
+      "signature": "test_compiled_path",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_compiled_path"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::TestYamlSnapshotPartialParsing",
+      "signature": "TestYamlSnapshotPartialParsing",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::TestYamlSnapshotPartialParsing"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_basic_snapshot.py::test_snapshot_partial_parsing",
+      "signature": "test_snapshot_partial_parsing",
+      "is_public_api": true,
+      "id": "test_basic_snapshot.py::test_snapshot_partial_parsing"
+    },
+    {
+      "id": "datetime.py"
+    },
+    {
+      "id": "pytz.py"
+    },
+    {
+      "node_type": "module",
+      "path": "test_snapshot_empty.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot functionality with the --empty flag, which creates snapshot tables without populating them with data. It verifies that when using the --empty flag, snapshot tables remain empty even after multiple runs, ensuring the flag works correctly for scenarios where empty snapshot structures are needed for data modeling or testing purposes.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 3.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_snapshot_empty.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_empty.py::TestSnapshotEmpty",
+      "signature": "TestSnapshotEmpty",
+      "is_public_api": true,
+      "id": "test_snapshot_empty.py::TestSnapshotEmpty"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_empty.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_snapshot_empty.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_empty.py::test_check",
+      "signature": "test_check",
+      "is_public_api": true,
+      "id": "test_snapshot_empty.py::test_check"
+    },
+    {
+      "node_type": "module",
+      "path": "fixtures.py",
+      "language": "python",
+      "purpose_statement": "This module provides test fixtures for dbt snapshot functionality, containing sample snapshot configurations, custom snapshot strategies, and associated test data. It exists to support testing dbt's snapshotting capabilities across different database configurations and edge cases, including custom snapshot strategies, schema variations, and data validation tests.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 0.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "fixtures.py"
+    },
+    {
+      "node_type": "module",
+      "path": "test_check_cols_updated_at_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests that dbt's snapshot functionality correctly captures timestamp-based changes when using the 'check' strategy with an 'updated_at' column. It validates that the dbt_updated_at column properly reflects the timestamp expression provided in the snapshot configuration by comparing actual snapshot results against expected data across multiple snapshot runs. This ensures data lineage and change tracking work correctly for time-sensitive data pipelines.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 4.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_check_cols_updated_at_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_check_cols_updated_at_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_check_cols_updated_at_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_check_cols_updated_at_snapshot.py::seeds",
+      "signature": "seeds",
+      "is_public_api": true,
+      "id": "test_check_cols_updated_at_snapshot.py::seeds"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_check_cols_updated_at_snapshot.py::project_config_update",
+      "signature": "project_config_update",
+      "is_public_api": true,
+      "id": "test_check_cols_updated_at_snapshot.py::project_config_update"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_check_cols_updated_at_snapshot.py::test_snapshots",
+      "signature": "test_snapshots",
+      "is_public_api": true,
+      "id": "test_check_cols_updated_at_snapshot.py::test_snapshots"
+    },
+    {
+      "node_type": "module",
+      "path": "test_hard_delete_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot functionality for handling hard deletes in data pipelines. It verifies that when records are physically deleted from source tables, the snapshot mechanism correctly marks them as invalidated with proper timestamps, and can properly revive records when they're re-added. This ensures data lineage and historical tracking remain accurate even when source data undergoes hard deletions.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 8.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": false,
+      "pagerank": 0.052631578947368404,
+      "id": "test_hard_delete_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_hard_delete_snapshot.py::convert_to_aware",
+      "signature": "convert_to_aware",
+      "is_public_api": true,
+      "id": "test_hard_delete_snapshot.py::convert_to_aware"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_hard_delete_snapshot.py::is_close_datetime",
+      "signature": "is_close_datetime",
+      "is_public_api": true,
+      "id": "test_hard_delete_snapshot.py::is_close_datetime"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_hard_delete_snapshot.py::datetime_snapshot",
+      "signature": "datetime_snapshot",
+      "is_public_api": true,
+      "id": "test_hard_delete_snapshot.py::datetime_snapshot"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_hard_delete_snapshot.py::setUp",
+      "signature": "setUp",
+      "is_public_api": true,
+      "id": "test_hard_delete_snapshot.py::setUp"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_hard_delete_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_hard_delete_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_hard_delete_snapshot.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_hard_delete_snapshot.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_hard_delete_snapshot.py::macros",
+      "signature": "macros",
+      "is_public_api": true,
+      "id": "test_hard_delete_snapshot.py::macros"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_hard_delete_snapshot.py::test_snapshot_hard_delete",
+      "signature": "test_snapshot_hard_delete",
+      "is_public_api": true,
+      "id": "test_hard_delete_snapshot.py::test_snapshot_hard_delete"
+    },
+    {
+      "id": "tests/functional/utils.py"
+    },
+    {
+      "node_type": "module",
+      "path": "test_missing_strategy_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module is a test that validates dbt's snapshot configuration validation logic. It specifically tests that dbt properly raises an error when a snapshot configuration is missing the mandatory 'strategy' parameter, ensuring data integrity by preventing incomplete snapshot configurations from being deployed. This helps maintain data reliability in data transformation pipelines by enforcing required configuration parameters.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 4.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": false,
+      "pagerank": 0.052631578947368404,
+      "id": "test_missing_strategy_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_missing_strategy_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_missing_strategy_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_missing_strategy_snapshot.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_missing_strategy_snapshot.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_missing_strategy_snapshot.py::macros",
+      "signature": "macros",
+      "is_public_api": true,
+      "id": "test_missing_strategy_snapshot.py::macros"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_missing_strategy_snapshot.py::test_missing_strategy",
+      "signature": "test_missing_strategy",
+      "is_public_api": true,
+      "id": "test_missing_strategy_snapshot.py::test_missing_strategy"
+    },
+    {
+      "id": "dbt_common/dataclass_schema.py"
+    },
+    {
+      "node_type": "module",
+      "path": "test_invalid_namespace_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot functionality when a custom snapshot strategy references an invalid namespace. It verifies that dbt properly handles and fails when attempting to use a non-existent custom snapshot strategy ('dbt.custom'), ensuring the system correctly validates strategy references and prevents execution with invalid configurations.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 5.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": false,
+      "pagerank": 0.052631578947368404,
+      "id": "test_invalid_namespace_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_invalid_namespace_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_invalid_namespace_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_invalid_namespace_snapshot.py::macros",
+      "signature": "macros",
+      "is_public_api": true,
+      "id": "test_invalid_namespace_snapshot.py::macros"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_invalid_namespace_snapshot.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_invalid_namespace_snapshot.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_invalid_namespace_snapshot.py::seeds",
+      "signature": "seeds",
+      "is_public_api": true,
+      "id": "test_invalid_namespace_snapshot.py::seeds"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_invalid_namespace_snapshot.py::test_custom_snapshot_invalid_namespace",
+      "signature": "test_custom_snapshot_invalid_namespace",
+      "is_public_api": true,
+      "id": "test_invalid_namespace_snapshot.py::test_custom_snapshot_invalid_namespace"
+    },
+    {
+      "node_type": "module",
+      "path": "test_check_cols_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot functionality with check strategy column tracking. It validates that when source data changes over multiple versions, the snapshot correctly tracks historical values, invalidates old records, and maintains proper current state. The test ensures data lineage and change tracking work correctly for business-critical historical data analysis.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 3.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_check_cols_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_check_cols_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_check_cols_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_check_cols_snapshot.py::tests",
+      "signature": "tests",
+      "is_public_api": true,
+      "id": "test_check_cols_snapshot.py::tests"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_check_cols_snapshot.py::test_snapshots",
+      "signature": "test_snapshots",
+      "is_public_api": true,
+      "id": "test_check_cols_snapshot.py::test_snapshots"
+    },
+    {
+      "node_type": "module",
+      "path": "test_snapshot_config.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt snapshot configuration functionality to ensure data change tracking works correctly. It validates that snapshots can be configured both inline within SQL files and externally via YAML schema files, ensuring data teams can reliably track historical changes to critical business data like order statuses.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 4.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_snapshot_config.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_config.py::TestSnapshotConfig",
+      "signature": "TestSnapshotConfig",
+      "is_public_api": true,
+      "id": "test_snapshot_config.py::TestSnapshotConfig"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_config.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_snapshot_config.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_config.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_snapshot_config.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_config.py::test_config",
+      "signature": "test_config",
+      "is_public_api": true,
+      "id": "test_snapshot_config.py::test_config"
+    },
+    {
+      "node_type": "module",
+      "path": "test_long_text_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot functionality with long text fields to ensure data integrity when handling large string values. It validates that snapshot tables correctly capture and store text data exceeding typical column lengths, preventing data truncation or corruption in change data capture scenarios. This ensures reliable historical tracking of text-heavy data in data warehousing pipelines.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 4.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_long_text_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_long_text_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_long_text_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_long_text_snapshot.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_long_text_snapshot.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_long_text_snapshot.py::macros",
+      "signature": "macros",
+      "is_public_api": true,
+      "id": "test_long_text_snapshot.py::macros"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_long_text_snapshot.py::test_long_text",
+      "signature": "test_long_text",
+      "is_public_api": true,
+      "id": "test_long_text_snapshot.py::test_long_text"
+    },
+    {
+      "node_type": "module",
+      "path": "test_changing_strategy_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot functionality when switching between snapshot strategies (check vs timestamp). It validates that changing strategies mid-process correctly captures data changes by simulating a three-step workflow: initial check strategy, adding timestamp columns, then switching to timestamp strategy. This ensures data integrity is maintained during strategy transitions in data pipeline operations.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 4.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_changing_strategy_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_strategy_snapshot.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_changing_strategy_snapshot.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_strategy_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_changing_strategy_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_strategy_snapshot.py::tests",
+      "signature": "tests",
+      "is_public_api": true,
+      "id": "test_changing_strategy_snapshot.py::tests"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_strategy_snapshot.py::test_changing_strategy",
+      "signature": "test_changing_strategy",
+      "is_public_api": true,
+      "id": "test_changing_strategy_snapshot.py::test_changing_strategy"
+    },
+    {
+      "node_type": "module",
+      "path": "test_cross_schema_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's ability to create snapshots in one schema and reference them from another schema. It validates cross-schema snapshot functionality by creating a snapshot in a separate target schema and then running models that reference that snapshot. This ensures data consistency and referential integrity when snapshots are stored in different schemas than the models that use them.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 4.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": false,
+      "pagerank": 0.052631578947368404,
+      "id": "test_cross_schema_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_cross_schema_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_cross_schema_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_cross_schema_snapshot.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_cross_schema_snapshot.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_cross_schema_snapshot.py::macros",
+      "signature": "macros",
+      "is_public_api": true,
+      "id": "test_cross_schema_snapshot.py::macros"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_cross_schema_snapshot.py::test_cross_schema_snapshot",
+      "signature": "test_cross_schema_snapshot",
+      "is_public_api": true,
+      "id": "test_cross_schema_snapshot.py::test_cross_schema_snapshot"
+    },
+    {
+      "node_type": "module",
+      "path": "test_renamed_source_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot functionality when the underlying data source changes structure (specifically when a new column is added). It verifies that snapshots correctly handle schema evolution by ensuring data integrity is maintained when switching between different seed files with varying column structures. The test validates that snapshot tables properly accommodate new columns while preserving existing data.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 4.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": false,
+      "pagerank": 0.052631578947368404,
+      "id": "test_renamed_source_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_renamed_source_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_renamed_source_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_renamed_source_snapshot.py::macros",
+      "signature": "macros",
+      "is_public_api": true,
+      "id": "test_renamed_source_snapshot.py::macros"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_renamed_source_snapshot.py::seeds",
+      "signature": "seeds",
+      "is_public_api": true,
+      "id": "test_renamed_source_snapshot.py::seeds"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_renamed_source_snapshot.py::test_renamed_source",
+      "signature": "test_renamed_source",
+      "is_public_api": true,
+      "id": "test_renamed_source_snapshot.py::test_renamed_source"
+    },
+    {
+      "node_type": "module",
+      "path": "test_snapshot_column_names.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot functionality with custom column name configurations. It validates that snapshot metadata columns (like valid_from, valid_to, scd_id) can be renamed through configuration, ensuring data teams can maintain consistent naming conventions across their data warehouse. The tests verify both model-level and project-level configuration approaches work correctly and detect configuration errors.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 14.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_snapshot_column_names.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_column_names.py::TestSnapshotColumnNames",
+      "signature": "TestSnapshotColumnNames",
+      "is_public_api": true,
+      "id": "test_snapshot_column_names.py::TestSnapshotColumnNames"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_column_names.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_snapshot_column_names.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_column_names.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_snapshot_column_names.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_column_names.py::test_snapshot_column_names",
+      "signature": "test_snapshot_column_names",
+      "is_public_api": true,
+      "id": "test_snapshot_column_names.py::test_snapshot_column_names"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_column_names.py::TestSnapshotColumnNamesFromDbtProject",
+      "signature": "TestSnapshotColumnNamesFromDbtProject",
+      "is_public_api": true,
+      "id": "test_snapshot_column_names.py::TestSnapshotColumnNamesFromDbtProject"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_column_names.py::project_config_update",
+      "signature": "project_config_update",
+      "is_public_api": true,
+      "id": "test_snapshot_column_names.py::project_config_update"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_column_names.py::test_snapshot_column_names_from_project",
+      "signature": "test_snapshot_column_names_from_project",
+      "is_public_api": true,
+      "id": "test_snapshot_column_names.py::test_snapshot_column_names_from_project"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_column_names.py::TestSnapshotInvalidColumnNames",
+      "signature": "TestSnapshotInvalidColumnNames",
+      "is_public_api": true,
+      "id": "test_snapshot_column_names.py::TestSnapshotInvalidColumnNames"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_column_names.py::test_snapshot_invalid_column_names",
+      "signature": "test_snapshot_invalid_column_names",
+      "is_public_api": true,
+      "id": "test_snapshot_column_names.py::test_snapshot_invalid_column_names"
+    },
+    {
+      "node_type": "module",
+      "path": "test_snapshot_timestamps.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt snapshot functionality with timestamp-based change detection. It validates that snapshots correctly capture data changes over time by creating source data, running models, and checking snapshot behavior. The test ensures the timestamp strategy works properly and provides appropriate configuration feedback.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 4.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_snapshot_timestamps.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_timestamps.py::TestSnapshotConfig",
+      "signature": "TestSnapshotConfig",
+      "is_public_api": true,
+      "id": "test_snapshot_timestamps.py::TestSnapshotConfig"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_timestamps.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_snapshot_timestamps.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_timestamps.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_snapshot_timestamps.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_snapshot_timestamps.py::test_timestamp_snapshot",
+      "signature": "test_timestamp_snapshot",
+      "is_public_api": true,
+      "id": "test_snapshot_timestamps.py::test_timestamp_snapshot"
+    },
+    {
+      "node_type": "module",
+      "path": "test_comment_ending_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests that dbt snapshots work correctly when SQL comments appear at the end of snapshot blocks. It specifically prevents a regression of GitHub issue #6781 where trailing comments caused parsing errors. The test creates a snapshot with a trailing comment, runs it twice to ensure proper table creation and column checking, and verifies the snapshot executes successfully.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 3.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": false,
+      "pagerank": 0.052631578947368404,
+      "id": "test_comment_ending_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_comment_ending_snapshot.py::TestSnapshotsWithCommentAtEnd",
+      "signature": "TestSnapshotsWithCommentAtEnd",
+      "is_public_api": true,
+      "id": "test_comment_ending_snapshot.py::TestSnapshotsWithCommentAtEnd"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_comment_ending_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_comment_ending_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_comment_ending_snapshot.py::test_comment_ending",
+      "signature": "test_comment_ending",
+      "is_public_api": true,
+      "id": "test_comment_ending_snapshot.py::test_comment_ending"
+    },
+    {
+      "node_type": "module",
+      "path": "test_slow_query_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's timestamp-based snapshot functionality to ensure data versioning works correctly over time. It validates that when records are updated, the new version's valid_from timestamp matches the previous version's valid_to timestamp, maintaining proper temporal continuity for historical data tracking. This ensures data integrity in slowly changing dimension scenarios where audit trails are critical.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 4.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_slow_query_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_slow_query_snapshot.py::models",
+      "signature": "models",
+      "is_public_api": true,
+      "id": "test_slow_query_snapshot.py::models"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_slow_query_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_slow_query_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_slow_query_snapshot.py::tests",
+      "signature": "tests",
+      "is_public_api": true,
+      "id": "test_slow_query_snapshot.py::tests"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_slow_query_snapshot.py::test_slow",
+      "signature": "test_slow",
+      "is_public_api": true,
+      "id": "test_slow_query_snapshot.py::test_slow"
+    },
+    {
+      "node_type": "module",
+      "path": "test_changing_check_cols_snapshot.py",
+      "language": "python",
+      "purpose_statement": "This module tests dbt's snapshot functionality with the 'check' strategy when columns are added to source data. It verifies that snapshots can handle schema evolution by properly detecting changes when new columns are included in check_cols configuration, ensuring data integrity is maintained during incremental schema changes.",
+      "domain_cluster": "Snapshot Testing",
+      "complexity_score": 6.0,
+      "change_velocity_30d": 0,
+      "is_dead_code_candidate": true,
+      "has_documentation_drift": true,
+      "pagerank": 0.052631578947368404,
+      "id": "test_changing_check_cols_snapshot.py"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_check_cols_snapshot.py::snapshots",
+      "signature": "snapshots",
+      "is_public_api": true,
+      "id": "test_changing_check_cols_snapshot.py::snapshots"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_check_cols_snapshot.py::seeds",
+      "signature": "seeds",
+      "is_public_api": true,
+      "id": "test_changing_check_cols_snapshot.py::seeds"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_check_cols_snapshot.py::project_config_update",
+      "signature": "project_config_update",
+      "is_public_api": true,
+      "id": "test_changing_check_cols_snapshot.py::project_config_update"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_check_cols_snapshot.py::run_check_cols_snapshot_with_schema_change",
+      "signature": "run_check_cols_snapshot_with_schema_change",
+      "is_public_api": true,
+      "id": "test_changing_check_cols_snapshot.py::run_check_cols_snapshot_with_schema_change"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_check_cols_snapshot.py::test_check_cols_snapshot_with_schema_change",
+      "signature": "test_check_cols_snapshot_with_schema_change",
+      "is_public_api": true,
+      "id": "test_changing_check_cols_snapshot.py::test_check_cols_snapshot_with_schema_change"
+    },
+    {
+      "node_type": "function",
+      "qualified_name": "test_changing_check_cols_snapshot.py::test_check_cols_snapshot_with_schema_change_and_mismatched_casing",
+      "signature": "test_check_cols_snapshot_with_schema_change_and_mismatched_casing",
+      "is_public_api": true,
+      "id": "test_changing_check_cols_snapshot.py::test_check_cols_snapshot_with_schema_change_and_mismatched_casing"
+    },
+    {
+      "node_type": "transformation",
+      "source_file": "data/invalidate_postgres.sql",
+      "logic_type": "sql_transform",
+      "id": "data/invalidate_postgres.sql:sql_transform"
+    },
+    {
+      "node_type": "dataset",
+      "name": "invalidate_postgres",
+      "storage_type": "table",
+      "schema_snapshot": {},
+      "id": "invalidate_postgres"
+    },
+    {
+      "node_type": "transformation",
+      "source_file": "data/seed_dbt_valid_to.sql",
+      "logic_type": "sql_transform",
+      "id": "data/seed_dbt_valid_to.sql:sql_transform"
+    },
+    {
+      "node_type": "dataset",
+      "name": "seed_dbt_valid_to",
+      "storage_type": "table",
+      "schema_snapshot": {},
+      "id": "seed_dbt_valid_to"
+    },
+    {
+      "node_type": "transformation",
+      "source_file": "data/seed_pg.sql",
+      "logic_type": "sql_transform",
+      "id": "data/seed_pg.sql:sql_transform"
+    },
+    {
+      "node_type": "dataset",
+      "name": "seed_pg",
+      "storage_type": "table",
+      "schema_snapshot": {},
+      "id": "seed_pg"
+    },
+    {
+      "node_type": "transformation",
+      "source_file": "data/seed_cn.sql",
+      "logic_type": "sql_transform",
+      "id": "data/seed_cn.sql:sql_transform"
+    },
+    {
+      "node_type": "dataset",
+      "name": "seed_cn",
+      "storage_type": "table",
+      "schema_snapshot": {},
+      "id": "seed_cn"
+    },
+    {
+      "node_type": "transformation",
+      "source_file": "data/shared_macros.sql",
+      "logic_type": "sql_transform",
+      "id": "data/shared_macros.sql:sql_transform"
+    },
+    {
+      "node_type": "dataset",
+      "name": "shared_macros",
+      "storage_type": "table",
+      "schema_snapshot": {},
+      "id": "shared_macros"
+    },
+    {
+      "node_type": "transformation",
+      "source_file": "data/update.sql",
+      "logic_type": "sql_transform",
+      "id": "data/update.sql:sql_transform"
+    },
+    {
+      "node_type": "dataset",
+      "name": "update",
+      "storage_type": "table",
+      "schema_snapshot": {},
+      "id": "update"
+    }
+  ],
+  "edges": [
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_select_exclude_snapshot.py",
+      "target": "os.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_select_exclude_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_select_exclude_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_select_exclude_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_basic_snapshot.py",
+      "target": "os.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_basic_snapshot.py",
+      "target": "datetime.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_basic_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_basic_snapshot.py",
+      "target": "pytz.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_basic_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_basic_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_snapshot_empty.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_snapshot_empty.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_check_cols_updated_at_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_check_cols_updated_at_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_hard_delete_snapshot.py",
+      "target": "os.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_hard_delete_snapshot.py",
+      "target": "datetime.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_hard_delete_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_hard_delete_snapshot.py",
+      "target": "pytz.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_hard_delete_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_hard_delete_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_hard_delete_snapshot.py",
+      "target": "tests/functional/utils.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_missing_strategy_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_missing_strategy_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_missing_strategy_snapshot.py",
+      "target": "dbt_common/dataclass_schema.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_missing_strategy_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_invalid_namespace_snapshot.py",
+      "target": "os.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_invalid_namespace_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_invalid_namespace_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_invalid_namespace_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_check_cols_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_check_cols_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_snapshot_config.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_snapshot_config.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_long_text_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_long_text_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_long_text_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_changing_strategy_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_changing_strategy_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_changing_strategy_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_cross_schema_snapshot.py",
+      "target": "os.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_cross_schema_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_cross_schema_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_cross_schema_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_renamed_source_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_renamed_source_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_renamed_source_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_snapshot_column_names.py",
+      "target": "os.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_snapshot_column_names.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_snapshot_column_names.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_snapshot_timestamps.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_snapshot_timestamps.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_comment_ending_snapshot.py",
+      "target": "os.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_comment_ending_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_comment_ending_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_slow_query_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_slow_query_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_slow_query_snapshot.py",
+      "target": "tests/functional/snapshots/fixtures.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_changing_check_cols_snapshot.py",
+      "target": "pytest.py"
+    },
+    {
+      "edge_type": "IMPORTS",
+      "source": "test_changing_check_cols_snapshot.py",
+      "target": "dbt/tests/util.py"
+    },
+    {
+      "edge_type": "PRODUCES",
+      "transformation_type": "sql",
+      "source_line": 1,
+      "source": "data/invalidate_postgres.sql:sql_transform",
+      "target": "invalidate_postgres"
+    },
+    {
+      "edge_type": "PRODUCES",
+      "transformation_type": "sql",
+      "source_line": 1,
+      "source": "data/seed_dbt_valid_to.sql:sql_transform",
+      "target": "seed_dbt_valid_to"
+    },
+    {
+      "edge_type": "PRODUCES",
+      "transformation_type": "sql",
+      "source_line": 1,
+      "source": "data/seed_pg.sql:sql_transform",
+      "target": "seed_pg"
+    },
+    {
+      "edge_type": "PRODUCES",
+      "transformation_type": "sql",
+      "source_line": 1,
+      "source": "data/seed_cn.sql:sql_transform",
+      "target": "seed_cn"
+    },
+    {
+      "edge_type": "PRODUCES",
+      "transformation_type": "sql",
+      "source_line": 1,
+      "source": "data/shared_macros.sql:sql_transform",
+      "target": "shared_macros"
+    },
+    {
+      "edge_type": "PRODUCES",
+      "transformation_type": "sql",
+      "source_line": 1,
+      "source": "data/update.sql:sql_transform",
+      "target": "update"
+    }
+  ]
+}
