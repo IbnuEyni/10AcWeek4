@@ -101,10 +101,12 @@ class Semanticist:
                     # Update node in graph
                     self.kg.graph.nodes[node_id]["purpose_statement"] = result["purpose"]
                     self.kg.graph.nodes[node_id]["has_documentation_drift"] = result["has_drift"]
+                    self.kg.graph.nodes[node_id]["drift_severity"] = result.get("drift_severity", "none")
                     
                     print(f"    ✓ Purpose: {result['purpose'][:80]}...")
                     if result["has_drift"]:
-                        print(f"    ⚠ Documentation drift detected!")
+                        severity = result.get("drift_severity", "unknown")
+                        print(f"    ⚠ Documentation drift detected! Severity: {severity}")
                         self.analysis_results["drift_detected"] += 1
                     
                     self.analysis_results["modules_analyzed"] += 1
@@ -152,8 +154,21 @@ class Semanticist:
                 prompt=prompt,
                 tier="cheap",
                 max_tokens=300,
-                temperature=0.3  # Lower temperature for more consistent output
+                temperature=0.3,  # Lower temperature for more consistent output
+                task_importance="normal"
             )
+            
+            # Log to tracer
+            if self.tracer:
+                self.tracer.log_llm_call(
+                    agent="Semanticist",
+                    model="deepseek/deepseek-chat",
+                    prompt=prompt[:500],
+                    response=response[:500],
+                    tokens_used=self.budget.estimate_tokens(prompt + response),
+                    cost=0.0,  # Cost tracked by budget
+                    confidence="0.8"
+                )
             
             # Parse response
             result = self._parse_llm_response(response)
@@ -207,8 +222,8 @@ class Semanticist:
         """
         prompt = f"""Analyze this Python module and provide:
 
-1. A 2-3 sentence business purpose statement describing what this module does and why it exists
-2. Whether the existing docstring (if any) contradicts the actual code implementation
+1. A 2-3 sentence business purpose statement by reading ONLY the code implementation (ignore any docstrings)
+2. Compare your inferred purpose against the existing docstring and rate drift severity
 
 Module: {module_path}
 
@@ -222,15 +237,16 @@ Code:
 
 Respond in JSON format:
 {{
-  "purpose": "2-3 sentence description of what this module does",
+  "purpose": "2-3 sentence description inferred from code behavior only",
   "has_drift": true/false,
-  "drift_reason": "explanation if drift detected, otherwise null"
+  "drift_severity": "none|low|medium|high",
+  "drift_reason": "specific explanation of mismatch between docstring and actual code behavior"
 }}
 
-Focus on:
-- What business problem does this solve?
-- What are the key responsibilities?
-- Does the docstring accurately describe the code?
+IMPORTANT:
+- Infer purpose from code behavior (function definitions, logic, imports) NOT from docstrings
+- Then compare your inference to the docstring to detect drift
+- Drift severity: none (perfect match), low (minor wording), medium (missing details), high (contradicts code)
 """
         return prompt
     
@@ -269,6 +285,7 @@ Focus on:
             return {
                 "purpose": data.get("purpose", "").strip(),
                 "has_drift": bool(data.get("has_drift", False)),
+                "drift_severity": data.get("drift_severity", "none"),
                 "drift_reason": data.get("drift_reason")
             }
         
@@ -571,8 +588,21 @@ Respond with ONLY the domain name (1-2 words, no explanation).
                 prompt=prompt,
                 tier="expensive",
                 max_tokens=1200,  # Reduced to fit credit limits
-                temperature=0.4
+                temperature=0.4,
+                task_importance="critical"
             )
+            
+            # Log to tracer
+            if self.tracer:
+                self.tracer.log_llm_call(
+                    agent="Semanticist",
+                    model="deepseek/deepseek-chat",
+                    prompt=prompt[:500],
+                    response=response[:500],
+                    tokens_used=self.budget.estimate_tokens(prompt + response),
+                    cost=0.0,
+                    confidence="0.9"
+                )
             
             print("✓ Analysis complete\n")
             return response
@@ -661,22 +691,22 @@ Respond with ONLY the domain name (1-2 words, no explanation).
         Returns:
             Formatted prompt string
         """
-        # Format top modules
+        # Format top modules with file paths
         top_modules_text = "\n".join([
-            f"{i+1}. {m['path']} (PageRank: {m['pagerank']:.4f}, Domain: {m['domain']})\n   Purpose: {m['purpose']}"
+            f"{i+1}. `{m['path']}` (PageRank: {m['pagerank']:.4f}, Domain: {m['domain']})\n   Purpose: {m['purpose']}"
             for i, m in enumerate(context["top_modules"])
         ])
         
-        # Format entry datasets
+        # Format entry datasets with paths
         entry_datasets_text = "\n".join([
-            f"- {d['name']} (Schema: {d['schema']}, Path: {d['path']})"
-            for d in context["entry_datasets"][:10]  # Limit to 10
+            f"- `{d['name']}` (Path: {d['path']})"
+            for d in context["entry_datasets"][:10]
         ]) or "None identified"
         
-        # Format exit datasets
+        # Format exit datasets with paths
         exit_datasets_text = "\n".join([
-            f"- {d['name']} (Schema: {d['schema']}, Path: {d['path']})"
-            for d in context["exit_datasets"][:10]  # Limit to 10
+            f"- `{d['name']}` (Path: {d['path']})"
+            for d in context["exit_datasets"][:10]
         ]) or "None identified"
         
         # Format domains
@@ -687,7 +717,7 @@ Respond with ONLY the domain name (1-2 words, no explanation).
         
         prompt = f"""You are a Forward Deployed Engineer analyzing a new codebase on Day One.
 
-Answer the Five FDE Day-One Questions clearly and concisely, citing specific file paths from the architectural context below.
+Answer the Five FDE Day-One Questions clearly and concisely. CRITICAL: You MUST cite specific file paths and line ranges from the architectural context in EVERY answer.
 
 ## THE FIVE FDE DAY-ONE QUESTIONS:
 
@@ -718,29 +748,30 @@ Answer the Five FDE Day-One Questions clearly and concisely, citing specific fil
 ## INSTRUCTIONS:
 
 - Answer each question with 2-4 sentences
-- Cite specific file paths (e.g., "src/cli.py", "models/customers.sql")
+- MUST cite specific file paths in backticks (e.g., `src/cli.py`, `models/customers.sql`)
+- Include line ranges when relevant (e.g., `src/cli.py:45-67`)
+- Label each citation with analysis method: [Static Analysis], [LLM Inference], or [Graph Traversal]
 - Be concrete and actionable
 - Focus on what an FDE needs to know on Day One
-- Use markdown formatting
 
 Respond in this format:
 
 # FDE Day-One Analysis
 
 ## 1. What does this system do?
-[Your answer with file citations]
+[Your answer with file citations like `src/cli.py` [Static Analysis]]
 
 ## 2. Where does the data come from?
-[Your answer with file citations]
+[Your answer with file citations and analysis method labels]
 
 ## 3. Where does the data go?
-[Your answer with file citations]
+[Your answer with file citations and analysis method labels]
 
 ## 4. What are the critical paths?
-[Your answer with file citations]
+[Your answer with file citations and analysis method labels]
 
 ## 5. What are the biggest risks?
-[Your answer with file citations]
+[Your answer with file citations and analysis method labels]
 """
         
         return prompt

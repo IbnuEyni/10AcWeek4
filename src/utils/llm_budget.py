@@ -39,6 +39,11 @@ class ContextWindowBudget:
         },
     }
     
+    # Token budget limits
+    MAX_TOKENS_CHEAP = 500000  # 500K tokens for cheap tier
+    MAX_TOKENS_EXPENSIVE = 100000  # 100K tokens for expensive tier
+    MAX_TOTAL_TOKENS = 1000000  # 1M total token budget
+    
     def __init__(self, api_key: Optional[str] = None):
         """
         Initialize the budget tracker.
@@ -49,6 +54,7 @@ class ContextWindowBudget:
         self.total_tokens = 0
         self.total_cost = 0.0
         self.call_history = []
+        self.tokens_by_tier = {"cheap": 0, "expensive": 0}
         
         # LiteLLM automatically reads GEMINI_API_KEY and DEEPSEEK_API_KEY from environment
         # No need to set API keys manually
@@ -88,10 +94,11 @@ class ContextWindowBudget:
         tier: str = "cheap",
         temperature: float = 0.7,
         max_tokens: int = 2000,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
+        task_importance: str = "normal"
     ) -> str:
         """
-        Call an LLM with automatic tier-based routing and budget tracking.
+        Call an LLM with automatic tier-based routing, budget tracking, and auto-downgrade.
         
         Args:
             prompt: User prompt/question
@@ -99,16 +106,36 @@ class ContextWindowBudget:
             temperature: Sampling temperature (0.0-1.0)
             max_tokens: Maximum tokens in response
             system_prompt: Optional system prompt for context
+            task_importance: "critical", "normal", or "low" - affects auto-downgrade behavior
         
         Returns:
             LLM response text
         
         Raises:
-            ValueError: If tier is invalid
+            ValueError: If tier is invalid or budget exceeded
             Exception: If LLM call fails
         """
         if tier not in self.MODELS:
             raise ValueError(f"Invalid tier '{tier}'. Must be 'cheap' or 'expensive'.")
+        
+        # Check total budget
+        if self.total_tokens >= self.MAX_TOTAL_TOKENS:
+            raise ValueError(f"Total token budget exceeded: {self.total_tokens}/{self.MAX_TOTAL_TOKENS}")
+        
+        # Auto-downgrade expensive tier if budget low
+        original_tier = tier
+        if tier == "expensive":
+            if self.tokens_by_tier["expensive"] >= self.MAX_TOKENS_EXPENSIVE:
+                if task_importance != "critical":
+                    print(f"  ⚠ Auto-downgrading to cheap tier (expensive budget exhausted)")
+                    tier = "cheap"
+                else:
+                    raise ValueError(f"Expensive tier budget exceeded and task is critical")
+        
+        # Check tier-specific budget
+        if tier == "cheap" and self.tokens_by_tier["cheap"] >= self.MAX_TOKENS_CHEAP:
+            if task_importance == "low":
+                raise ValueError(f"Cheap tier budget exceeded, skipping low-importance task")
         
         model_config = self.MODELS[tier]
         model_name = model_config["name"]
@@ -151,15 +178,18 @@ class ContextWindowBudget:
             # Update budget trackers
             self.total_tokens += total_tokens
             self.total_cost += cost
+            self.tokens_by_tier[tier] += total_tokens
             
             # Record call history
             self.call_history.append({
                 "model": model_name,
                 "tier": tier,
+                "original_tier": original_tier,
                 "input_tokens": input_tokens,
                 "output_tokens": output_tokens,
                 "total_tokens": total_tokens,
                 "cost": cost,
+                "task_importance": task_importance,
                 "prompt_preview": prompt[:100] + "..." if len(prompt) > 100 else prompt
             })
             
@@ -192,14 +222,17 @@ class ContextWindowBudget:
                 
                 self.total_tokens += total_tokens
                 self.total_cost += cost
+                self.tokens_by_tier[tier] += total_tokens
                 
                 self.call_history.append({
                     "model": fallback_model,
                     "tier": tier,
+                    "original_tier": original_tier,
                     "input_tokens": input_tokens,
                     "output_tokens": output_tokens,
                     "total_tokens": total_tokens,
                     "cost": cost,
+                    "task_importance": task_importance,
                     "prompt_preview": prompt[:100] + "..." if len(prompt) > 100 else prompt,
                     "fallback": True
                 })
@@ -215,12 +248,18 @@ class ContextWindowBudget:
         Get a summary of token usage and costs.
         
         Returns:
-            Dict with total_tokens, total_cost, and call_count
+            Dict with total_tokens, total_cost, call_count, and budget status
         """
         return {
             "total_tokens": self.total_tokens,
             "total_cost": round(self.total_cost, 4),
             "call_count": len(self.call_history),
+            "tokens_by_tier": self.tokens_by_tier,
+            "budget_remaining": {
+                "cheap": max(0, self.MAX_TOKENS_CHEAP - self.tokens_by_tier["cheap"]),
+                "expensive": max(0, self.MAX_TOKENS_EXPENSIVE - self.tokens_by_tier["expensive"]),
+                "total": max(0, self.MAX_TOTAL_TOKENS - self.total_tokens)
+            },
             "avg_tokens_per_call": (
                 round(self.total_tokens / len(self.call_history))
                 if self.call_history else 0
@@ -243,6 +282,13 @@ class ContextWindowBudget:
         print(f"Total Cost:             ${summary['total_cost']:.4f}")
         print(f"Avg Tokens per Call:    {summary['avg_tokens_per_call']:,}")
         print(f"Avg Cost per Call:      ${summary['avg_cost_per_call']:.4f}")
+        print("\nTokens by Tier:")
+        print(f"  Cheap:     {summary['tokens_by_tier']['cheap']:,} / {self.MAX_TOKENS_CHEAP:,}")
+        print(f"  Expensive: {summary['tokens_by_tier']['expensive']:,} / {self.MAX_TOKENS_EXPENSIVE:,}")
+        print("\nBudget Remaining:")
+        print(f"  Cheap:     {summary['budget_remaining']['cheap']:,} tokens")
+        print(f"  Expensive: {summary['budget_remaining']['expensive']:,} tokens")
+        print(f"  Total:     {summary['budget_remaining']['total']:,} tokens")
         print("="*60)
         
         if self.call_history:

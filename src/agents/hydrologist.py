@@ -4,6 +4,7 @@ import networkx as nx
 from src.graph.knowledge_graph import KnowledgeGraph
 from src.analyzers.sql_lineage import extract_sql_dependencies
 from src.analyzers.dag_config_parser import parse_yaml_config
+from src.analyzers.python_dataflow import extract_python_dataflow
 from src.models.schema import DatasetNode, TransformationNode, ProducesEdge, ConsumesEdge, ConfiguresEdge
 
 
@@ -14,27 +15,28 @@ class Hydrologist:
     
     def run(self, repo_path: str, changed_files: set = None):
         """
-        Analyze SQL files and build data lineage graph.
+        Analyze SQL, Python, and YAML files to build data lineage graph.
         
         Args:
             repo_path: Path to repository root
             changed_files: Optional set of changed file paths for incremental mode
         """
         repo = Path(repo_path)
-        print(f"Hydrologist: Analyzing SQL files at {repo}")
+        print(f"Hydrologist: Analyzing data lineage at {repo}")
         
-        # Find all SQL files
+        # Find all relevant files
         sql_files = list(repo.rglob("*.sql"))
-        
-        # Find YAML config files (dbt, Airflow)
+        python_files = list(repo.rglob("*.py"))
         yaml_files = list(repo.rglob("*.yml")) + list(repo.rglob("*.yaml"))
         
         # Filter to only changed files if in incremental mode
         if changed_files is not None:
             sql_files = [f for f in sql_files if str(f.relative_to(repo)) in changed_files]
+            python_files = [f for f in python_files if str(f.relative_to(repo)) in changed_files]
             yaml_files = [f for f in yaml_files if str(f.relative_to(repo)) in changed_files]
         
         print(f"Hydrologist: Found {len(sql_files)} SQL files")
+        print(f"Hydrologist: Found {len(python_files)} Python files")
         print(f"Hydrologist: Found {len(yaml_files)} YAML config files")
         
         # Analyze YAML configs first (for metadata)
@@ -42,14 +44,24 @@ class Hydrologist:
             try:
                 self._analyze_yaml_config(yaml_file, repo)
             except Exception as e:
-                print(f"Hydrologist: Error analyzing {yaml_file}: {e}")
+                if self.tracer:
+                    self.tracer.log_error("Hydrologist", "analyze_yaml", str(yaml_file), str(e))
         
-        # Analyze each SQL file
+        # Analyze SQL files
         for sql_file in sql_files:
             try:
                 self._analyze_sql_file(sql_file, repo)
             except Exception as e:
-                print(f"Hydrologist: Error analyzing {sql_file}: {e}")
+                if self.tracer:
+                    self.tracer.log_error("Hydrologist", "analyze_sql", str(sql_file), str(e))
+        
+        # Analyze Python files for data IO
+        for python_file in python_files:
+            try:
+                self._analyze_python_dataflow(python_file, repo)
+            except Exception as e:
+                if self.tracer:
+                    self.tracer.log_error("Hydrologist", "analyze_python", str(python_file), str(e))
         
         print("Hydrologist: Data lineage analysis complete")
     
@@ -91,14 +103,18 @@ class Hydrologist:
         )
         self.kg.add_dataset_node(target_dataset)
         
-        # Add edge with metadata
+        # Add edge with consistent metadata
         self.kg.graph.add_edge(
             transformation_id,
             target_name,
             edge_type="PRODUCES",
             transformation_type="sql",
-            source_line=1
+            line_range=(1, 1)
         )
+        
+        if self.tracer:
+            self.tracer.log_action("Hydrologist", "extract_sql_lineage", relative_path, 
+                                   f"Sources: {lineage.get('sources', [])}, Targets: {lineage.get('targets', [])}", "1.0")
         
         for source_table in lineage.get("sources", []):
             source_dataset = DatasetNode(
@@ -109,11 +125,11 @@ class Hydrologist:
             self.kg.add_dataset_node(source_dataset)
             
             self.kg.graph.add_edge(
-                transformation_id,
                 source_table,
+                transformation_id,
                 edge_type="CONSUMES",
                 transformation_type="sql",
-                source_line=1
+                line_range=(1, 1)
             )
         
         for target_table in lineage.get("targets", []):
@@ -130,7 +146,7 @@ class Hydrologist:
                     target_table,
                     edge_type="PRODUCES",
                     transformation_type="sql",
-                    source_line=1
+                    line_range=(1, 1)
                 )
     
     def _analyze_yaml_config(self, file_path: Path, repo_root: Path):
@@ -172,6 +188,82 @@ class Hydrologist:
                     source_file=relative_path,
                     logic_type="pipeline_step"
                 )
+    
+    def _analyze_python_dataflow(self, file_path: Path, repo_root: Path):
+        """Analyze Python file for data IO operations."""
+        relative_path = str(file_path.relative_to(repo_root))
+        
+        result = extract_python_dataflow(file_path)
+        
+        if result.get('error'):
+            if self.tracer:
+                self.tracer.log_error("Hydrologist", "parse_python", relative_path, result['error'])
+            return
+        
+        io_operations = result.get('io_operations', [])
+        unresolved = result.get('unresolved_dynamics', [])
+        
+        # Log unresolved dynamics
+        for dynamic in unresolved:
+            if self.tracer:
+                self.tracer.log_action("Hydrologist", "unresolved_dynamic", relative_path,
+                                       f"Line {dynamic['line']}: {dynamic['reason']}", "0.5")
+        
+        if not io_operations:
+            return
+        
+        # Create transformation node for this Python file
+        transformation_id = f"{relative_path}:dataflow"
+        self.kg.graph.add_node(
+            transformation_id,
+            node_type="transformation",
+            source_file=relative_path,
+            logic_type="python_dataflow"
+        )
+        
+        # Process IO operations
+        for op in io_operations:
+            line_range = op.get('line_range', (op['line'], op['line']))
+            
+            if op['type'] == 'read':
+                source_name = op.get('source', '<unknown>')
+                if source_name != '<unknown>':
+                    source_dataset = DatasetNode(
+                        name=source_name,
+                        storage_type=op['framework'],
+                        schema_snapshot={}
+                    )
+                    self.kg.add_dataset_node(source_dataset)
+                    
+                    self.kg.graph.add_edge(
+                        source_name,
+                        transformation_id,
+                        edge_type="CONSUMES",
+                        transformation_type=op['framework'],
+                        line_range=line_range
+                    )
+            
+            elif op['type'] == 'write':
+                target_name = op.get('target', '<unknown>')
+                if target_name != '<unknown>':
+                    target_dataset = DatasetNode(
+                        name=target_name,
+                        storage_type=op['framework'],
+                        schema_snapshot={}
+                    )
+                    self.kg.add_dataset_node(target_dataset)
+                    
+                    self.kg.graph.add_edge(
+                        transformation_id,
+                        target_name,
+                        edge_type="PRODUCES",
+                        transformation_type=op['framework'],
+                        line_range=line_range
+                    )
+        
+        if self.tracer:
+            self.tracer.log_action("Hydrologist", "extract_python_dataflow", relative_path,
+                                   f"Found {len(io_operations)} IO operations", "1.0")
     
     def blast_radius(self, node_id: str) -> Set[str]:
         """

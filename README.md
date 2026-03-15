@@ -33,20 +33,25 @@ The Brownfield Cartographer solves the "Day-One Problem" for Forward Deployed En
 - Dead code candidate identification
 
 ### Data Lineage (Hydrologist Agent)
+- **Python Data Flow Analysis**: pandas, PySpark, SQLAlchemy IO operations
+- **Dynamic Reference Detection**: Logs unresolved f-strings and variable paths
 - SQL dependency extraction with sqlglot (supports PostgreSQL, BigQuery, Snowflake)
 - dbt Jinja template preprocessing (`{{ source() }}`, `{{ ref() }}`)
 - YAML config parsing (dbt schema.yml, Airflow DAGs)
+- **Cross-Language Lineage**: Merges SQL, Python, and YAML into coherent graph
+- **Consistent Edge Metadata**: All edges have line_range and transformation_type
 - Blast radius calculation for impact analysis
 - Upstream/downstream dependency tracing
 
 ### Semantic Analysis (Semanticist Agent)
-- LLM-powered purpose statement generation
-- Documentation drift detection
+- LLM-powered purpose statement generation (infers from code behavior, not docstrings)
+- **Structured Documentation Drift Detection**: Severity levels (none/low/medium/high)
 - Business context extraction from code
 - Automatic docstring validation
 - Domain clustering using embeddings and k-means
 - Automatic business domain naming
-- **FDE Day-One Questions**: Answers the Five Day-One Questions using architectural context
+- **FDE Day-One Questions**: Answers with explicit file paths and line citations
+- **Analysis Method Labels**: [Static Analysis], [LLM Inference], [Graph Traversal]
 
 ### Knowledge Graph
 - NetworkX-based directed graph
@@ -54,6 +59,14 @@ The Brownfield Cartographer solves the "Day-One Problem" for Forward Deployed En
 - JSON serialization for downstream tooling
 - Node types: Module, Dataset, Function, Transformation
 - Edge types: IMPORTS, PRODUCES, CONSUMES, CALLS, CONFIGURES
+- **Consistent Metadata**: All edges have line_range and transformation_type
+
+### Tracing & Observability
+- **Cartography Tracer**: Logs every agent action to `cartography_trace.jsonl`
+- Timestamps, evidence sources, confidence scores
+- Analysis type labels: "static" or "llm"
+- Error isolation and logging
+- Budget tracking with auto-downgrade
 
 ## Installation
 

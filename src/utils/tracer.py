@@ -45,7 +45,8 @@ class CartographyTracer:
         action: str,
         target: str,
         evidence: str = "",
-        confidence: str = "1.0"
+        confidence: str = "1.0",
+        analysis_type: str = "static"
     ) -> None:
         """
         Log an analysis action to the trace file.
@@ -56,6 +57,7 @@ class CartographyTracer:
             target: Target of the action (e.g., file path, dataset name)
             evidence: Supporting evidence for the action (e.g., code snippet, SQL query)
             confidence: Confidence score as string (e.g., "0.95", "high", "medium")
+            analysis_type: "static" or "llm" - whether analysis was static or LLM-based
         """
         # Create log entry
         entry = {
@@ -64,7 +66,8 @@ class CartographyTracer:
             "action": action,
             "target": target,
             "evidence": evidence,
-            "confidence": confidence
+            "confidence": confidence,
+            "analysis_type": analysis_type
         }
         
         # Append to trace file (JSONL format - one JSON object per line)
@@ -125,7 +128,8 @@ class CartographyTracer:
         prompt: str,
         response: str,
         tokens_used: int = 0,
-        cost: float = 0.0
+        cost: float = 0.0,
+        confidence: str = "1.0"
     ) -> None:
         """
         Log an LLM API call.
@@ -137,6 +141,7 @@ class CartographyTracer:
             response: Response from the LLM
             tokens_used: Number of tokens used
             cost: Cost of the API call
+            confidence: Confidence in the LLM response
         """
         # Truncate prompt and response for readability
         prompt_preview = prompt[:300] + "..." if len(prompt) > 300 else prompt
@@ -158,7 +163,8 @@ Response:
             action="llm_call",
             target=model,
             evidence=evidence,
-            confidence="1.0"
+            confidence=confidence,
+            analysis_type="llm"
         )
     
     def log_error(
