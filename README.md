@@ -13,6 +13,18 @@ The Brownfield Cartographer solves the "Day-One Problem" for Forward Deployed En
 
 ## Features
 
+### Recent Improvements (Feedback-Driven)
+- **Robust Deserialization**: Graph loading with automatic Pydantic schema validation
+- **Multi-Language Router**: Extended AST parsing for Python, SQL, and YAML files
+- **Three SQL Dialects**: PostgreSQL, BigQuery, and Snowflake support with auto-detection
+- **Configurable Velocity**: Customizable time windows for git change tracking
+- **Impact Reports**: Automated high-churn hotspot and dead code identification
+- **Source/Sink Detection**: Utilities to find data pipeline entry and exit points
+- **Enriched Metadata**: Edge annotations with transformation types and line numbers
+- **GitHub URL Support**: Direct analysis of GitHub repositories via CLI
+- **Error Isolation**: Resilient pipeline that continues despite individual file failures
+- **Enhanced Logging**: Clear progress indicators and error reporting
+
 ### Static Analysis (Surveyor Agent)
 - Multi-language AST parsing with tree-sitter (Python, SQL, YAML)
 - Module import graph with PageRank for architectural hub identification
@@ -79,6 +91,9 @@ pip install -e .
 ```bash
 # Analyze a repository (full analysis)
 .venv/bin/python -m src.cli analyze --repo /path/to/repository
+
+# Analyze GitHub repository directly (NEW!)
+.venv/bin/python -m src.cli analyze --repo https://github.com/dbt-labs/jaffle-shop
 
 # Analyze current directory
 .venv/bin/python -m src.cli analyze --repo .
@@ -291,10 +306,9 @@ affected = hydrologist.blast_radius("users_table")
 - ✅ Mixed Python/SQL repositories
 
 ### SQL Dialects
-- PostgreSQL
+- PostgreSQL (default)
 - BigQuery
-- Snowflake
-- DuckDB
+- Snowflake (auto-detected from file paths)
 
 ### File Types
 - `.py` - Python modules
@@ -351,6 +365,10 @@ src/
 3. Update `orchestrator.py` if needed
 
 ## Troubleshooting
+
+### Common Issues
+
+See `QUICK_REFERENCE.md` for detailed usage of new features.
 
 ### Import Errors
 ```bash

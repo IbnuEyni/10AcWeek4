@@ -41,9 +41,6 @@ Thumbs.db
 # Project specific
 *.log
 
-# Large cartography output files (>100MB)
-.cartography/module_graph.json
-.cartography/lineage_graph.json
 
 # uv
 uv.lock
