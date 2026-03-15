@@ -5,19 +5,58 @@ import tree_sitter_python
 
 
 class LanguageRouter:
+    """Multi-language AST parser supporting Python, SQL, and YAML."""
+    
     def __init__(self):
         self.python_parser = Parser(Language(tree_sitter_python.language()))
+        self._sql_parser = None
+        self._yaml_parser = None
+    
+    def analyze_file(self, filepath: str) -> Optional[Dict[str, List[str]]]:
+        """Route file to appropriate parser based on extension."""
+        path = Path(filepath)
+        ext = path.suffix.lower()
+        
+        if ext == '.py':
+            return self.analyze_python_module(filepath)
+        elif ext == '.sql':
+            return self.analyze_sql_file(filepath)
+        elif ext in ['.yml', '.yaml']:
+            return self.analyze_yaml_file(filepath)
+        else:
+            print(f"Unsupported file type: {ext}")
+            return None
+    
+    def analyze_sql_file(self, filepath: str) -> Optional[Dict[str, List[str]]]:
+        """Parse SQL file and extract structural elements."""
+        try:
+            source = Path(filepath).read_text()
+            # Basic SQL structure extraction without tree-sitter
+            # (tree-sitter-sql requires separate installation)
+            tables = []
+            import re
+            # Extract table references
+            for match in re.finditer(r'\b(?:FROM|JOIN)\s+([\w.]+)', source, re.IGNORECASE):
+                tables.append(match.group(1))
+            return {"tables": list(set(tables)), "type": "sql"}
+        except Exception as e:
+            print(f"Error parsing SQL file {filepath}: {e}")
+            return None
+    
+    def analyze_yaml_file(self, filepath: str) -> Optional[Dict[str, List[str]]]:
+        """Parse YAML file and extract structural elements."""
+        try:
+            import yaml
+            with open(filepath, 'r') as f:
+                data = yaml.safe_load(f)
+            keys = list(data.keys()) if isinstance(data, dict) else []
+            return {"keys": keys, "type": "yaml"}
+        except Exception as e:
+            print(f"Error parsing YAML file {filepath}: {e}")
+            return None
     
     def analyze_python_module(self, filepath: str) -> Optional[Dict[str, List[str]]]:
-        """
-        Parse a Python file and extract imports and definitions.
-        
-        Args:
-            filepath: Path to Python file
-        
-        Returns:
-            Dict with 'imports' and 'definitions' lists, or None on error
-        """
+        """Parse a Python file and extract imports and definitions."""
         try:
             source = Path(filepath).read_bytes()
         except (FileNotFoundError, PermissionError, OSError) as e:
@@ -31,10 +70,7 @@ class LanguageRouter:
             imports = self._extract_imports(root, source)
             definitions = self._extract_definitions(root, source)
             
-            return {
-                "imports": imports,
-                "definitions": definitions
-            }
+            return {"imports": imports, "definitions": definitions}
         except Exception as e:
             print(f"Error parsing file {filepath}: {e}")
             return None

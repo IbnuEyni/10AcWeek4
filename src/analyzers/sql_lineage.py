@@ -45,23 +45,11 @@ def preprocess_dbt_jinja(sql_content: str) -> tuple[str, Dict[str, List[str]]]:
 
 
 def extract_sql_dependencies(sql_content: str, dialect: str = "postgres") -> Dict[str, List[str]]:
-    """
-    Parse SQL and extract source and target tables.
-    
-    Args:
-        sql_content: Raw SQL string
-        dialect: SQL dialect ('postgres' or 'bigquery')
-    
-    Returns:
-        Dict with 'sources' and 'targets' lists
-    """
+    """Parse SQL and extract source and target tables. Supports postgres, bigquery, snowflake."""
     sources = set()
     targets = set()
     
-    # Preprocess dbt Jinja templates
     cleaned_sql, dbt_refs = preprocess_dbt_jinja(sql_content)
-    
-    # Add dbt sources and refs to sources
     sources.update(dbt_refs["sources"])
     sources.update(dbt_refs["refs"])
     
@@ -72,28 +60,24 @@ def extract_sql_dependencies(sql_content: str, dialect: str = "postgres") -> Dic
             if not statement:
                 continue
             
-            # Extract target tables (INSERT, CREATE TABLE)
             if isinstance(statement, (exp.Insert, exp.Create)):
                 if statement.this:
                     target_name = _get_table_name(statement.this)
                     if target_name:
                         targets.add(target_name)
             
-            # Extract source tables from SELECT, FROM, JOIN, CTEs
+            # Extract from CTEs and subqueries
             for table_node in statement.find_all(exp.Table):
                 table_name = _get_table_name(table_node)
                 if table_name and not _is_target_in_statement(table_node, statement):
                     sources.add(table_name)
     
     except Exception as e:
-        # Graceful failure - still return dbt refs if parsing fails
+        print(f"Error parsing SQL ({dialect}): {e}")
         if not sources:
-            print(f"Error parsing SQL: {e}")
+            return {"sources": [], "targets": []}
     
-    return {
-        "sources": sorted(list(sources)),
-        "targets": sorted(list(targets))
-    }
+    return {"sources": sorted(list(sources)), "targets": sorted(list(targets))}
 
 
 def _get_table_name(node) -> str:
