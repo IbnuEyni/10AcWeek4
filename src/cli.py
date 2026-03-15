@@ -1,10 +1,31 @@
 import argparse
 from pathlib import Path
 from dotenv import load_dotenv
+import tempfile
+import subprocess
+import shutil
 from src.orchestrator import run_cartographer
 
-# Load environment variables from .env file
 load_dotenv()
+
+
+def clone_github_repo(url: str) -> Path:
+    """Clone a GitHub repository to a temporary directory."""
+    temp_dir = Path(tempfile.mkdtemp(prefix="cartographer_"))
+    print(f"Cloning {url} to {temp_dir}...")
+    try:
+        subprocess.run(
+            ["git", "clone", "--depth", "1", url, str(temp_dir)],
+            check=True,
+            capture_output=True,
+            text=True
+        )
+        print(f"✓ Repository cloned successfully")
+        return temp_dir
+    except subprocess.CalledProcessError as e:
+        print(f"Error cloning repository: {e.stderr}")
+        shutil.rmtree(temp_dir, ignore_errors=True)
+        raise
 
 
 def query_command(args):
@@ -59,6 +80,7 @@ def main():
         epilog="""
 Examples:
   python -m src.cli analyze --repo /path/to/repository
+  python -m src.cli analyze --repo https://github.com/user/repo
   python -m src.cli analyze --repo . --incremental
   python -m src.cli analyze --repo . --llm
   python -m src.cli query --repo . --question "What does src/cli.py do?"
@@ -76,7 +98,7 @@ Examples:
         "--repo",
         type=str,
         required=True,
-        help="Path to repository to analyze"
+        help="Path to repository or GitHub URL (e.g., https://github.com/user/repo)"
     )
     analyze_parser.add_argument(
         "--incremental",
@@ -110,7 +132,19 @@ Examples:
     args = parser.parse_args()
     
     if args.command == "analyze":
-        repo_path = Path(args.repo).resolve()
+        repo_input = args.repo
+        temp_dir = None
+        
+        # Check if input is a GitHub URL
+        if repo_input.startswith("https://github.com/") or repo_input.startswith("git@github.com:"):
+            try:
+                temp_dir = clone_github_repo(repo_input)
+                repo_path = temp_dir
+            except Exception as e:
+                print(f"Error: Failed to clone repository: {e}")
+                return 1
+        else:
+            repo_path = Path(repo_input).resolve()
         
         if not repo_path.exists():
             print(f"Error: Repository path does not exist: {repo_path}")
@@ -128,6 +162,10 @@ Examples:
             import traceback
             traceback.print_exc()
             return 1
+        finally:
+            if temp_dir:
+                print(f"\nCleaning up temporary directory: {temp_dir}")
+                shutil.rmtree(temp_dir, ignore_errors=True)
     
     elif args.command == "query":
         return query_command(args)
